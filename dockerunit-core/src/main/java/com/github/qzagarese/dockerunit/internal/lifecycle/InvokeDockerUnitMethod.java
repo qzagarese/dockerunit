@@ -5,17 +5,17 @@ import java.lang.reflect.Method;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 
-import com.github.qzagarese.dockerunit.MicrounitRunner;
+import com.github.qzagarese.dockerunit.DockerUnitRunner;
 import com.github.qzagarese.dockerunit.ServiceContext;
 
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class InvokeMicrounitMethod extends Statement {
+public class InvokeDockerUnitMethod extends Statement {
 
 	private final FrameworkMethod testMethod;
 	private final Object target;
-	private final MicrounitRunner runner;
+	private final DockerUnitRunner runner;
 	
 	@Override
 	public void evaluate() throws Throwable {

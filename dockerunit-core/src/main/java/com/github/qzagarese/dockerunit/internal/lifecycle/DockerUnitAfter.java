@@ -1,8 +1,9 @@
 package com.github.qzagarese.dockerunit.internal.lifecycle;
 
+import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 
-import com.github.qzagarese.dockerunit.MicrounitRunner;
+import com.github.qzagarese.dockerunit.DockerUnitRunner;
 import com.github.qzagarese.dockerunit.ServiceContext;
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProvider;
 import com.github.qzagarese.dockerunit.internal.ServiceContextBuilder;
@@ -10,9 +11,10 @@ import com.github.qzagarese.dockerunit.internal.ServiceContextBuilder;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class MicrounitAfterClass extends Statement {
+public class DockerUnitAfter extends Statement {
 
-	private final MicrounitRunner runner;
+	private final FrameworkMethod method;
+	private final DockerUnitRunner runner;
 	private final Statement statement;
 	private final DiscoveryProvider discoveryProvider;
 	private final ServiceContextBuilder contextBuilder;
@@ -21,18 +23,16 @@ public class MicrounitAfterClass extends Statement {
 	public void evaluate() throws Throwable {
 		try {
 			statement.evaluate();
-		} catch (Throwable t) {
+		} catch(Throwable t) {
 			t.printStackTrace();
 			throw t;
 		} finally {
-			ServiceContext context = runner.getClassContext();
+			ServiceContext context = runner.getContext(method);
 			if(context != null) {
+				context = context.subtract(runner.getClassContext());
 				ServiceContext cleared = contextBuilder.clearContext(context);
-				discoveryProvider.clearRegistry(cleared, cleared);
-			}
-			ServiceContext discoveryContext = runner.getDiscoveryContext();
-			if(discoveryContext != null) {	
-				contextBuilder.clearContext(discoveryContext);
+				runner.setContext(method, cleared);
+				discoveryProvider.clearRegistry(cleared, runner.getClassContext());
 			}
 		}
 	}

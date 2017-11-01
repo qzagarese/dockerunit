@@ -3,7 +3,7 @@ package com.github.qzagarese.dockerunit.internal.lifecycle;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 
-import com.github.qzagarese.dockerunit.MicrounitRunner;
+import com.github.qzagarese.dockerunit.DockerUnitRunner;
 import com.github.qzagarese.dockerunit.ServiceContext;
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProvider;
 import com.github.qzagarese.dockerunit.internal.DependencyDescriptor;
@@ -12,10 +12,10 @@ import com.github.qzagarese.dockerunit.internal.ServiceContextBuilder;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class MicrounitBefore extends Statement {
+public class DockerUnitBefore extends Statement {
 
 	private final FrameworkMethod method;
-	private final MicrounitRunner runner;
+	private final DockerUnitRunner runner;
 	private final Statement next;
 	private final DiscoveryProvider discoveryProvider;
 	private final ServiceContextBuilder contextBuilder;

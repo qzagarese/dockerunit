@@ -19,15 +19,15 @@ import com.github.qzagarese.dockerunit.discovery.DiscoveryProviderFactory;
 import com.github.qzagarese.dockerunit.internal.DependencyDescriptor;
 import com.github.qzagarese.dockerunit.internal.ServiceContextBuilder;
 import com.github.qzagarese.dockerunit.internal.ServiceContextBuilderFactory;
-import com.github.qzagarese.dockerunit.internal.lifecycle.InvokeMicrounitMethod;
-import com.github.qzagarese.dockerunit.internal.lifecycle.MicrounitAfter;
-import com.github.qzagarese.dockerunit.internal.lifecycle.MicrounitAfterClass;
-import com.github.qzagarese.dockerunit.internal.lifecycle.MicrounitBefore;
-import com.github.qzagarese.dockerunit.internal.lifecycle.MicrounitBeforeClass;
+import com.github.qzagarese.dockerunit.internal.lifecycle.InvokeDockerUnitMethod;
+import com.github.qzagarese.dockerunit.internal.lifecycle.DockerUnitAfter;
+import com.github.qzagarese.dockerunit.internal.lifecycle.DockerUnitAfterClass;
+import com.github.qzagarese.dockerunit.internal.lifecycle.DockerUnitBefore;
+import com.github.qzagarese.dockerunit.internal.lifecycle.DockerUnitBeforeClass;
 import com.github.qzagarese.dockerunit.internal.reflect.DependencyDescriptorBuilder;
 import com.github.qzagarese.dockerunit.internal.reflect.DependencyDescriptorBuilderFactory;
 
-public class MicrounitRunner extends BlockJUnit4ClassRunner {
+public class DockerUnitRunner extends BlockJUnit4ClassRunner {
 
 	private final Map<FrameworkMethod, ServiceContext> methodsContexts = new HashMap<>();
 	private ServiceContext classContext;
@@ -38,7 +38,7 @@ public class MicrounitRunner extends BlockJUnit4ClassRunner {
 	
 	private final Logger logger = Logger.getLogger(this.getClass().getSimpleName());
 	
-    public MicrounitRunner(Class<?> klass) throws InitializationError {
+    public DockerUnitRunner(Class<?> klass) throws InitializationError {
         super(klass);
         ServiceLoader<DiscoveryProviderFactory> loader = ServiceLoader.load(DiscoveryProviderFactory.class);
         List<DiscoveryProviderFactory> implementations = new ArrayList<>();
@@ -56,7 +56,7 @@ public class MicrounitRunner extends BlockJUnit4ClassRunner {
 
     @Override
     protected Statement methodInvoker(FrameworkMethod method, Object test) {
-        return new InvokeMicrounitMethod(method, test, this);
+        return new InvokeDockerUnitMethod(method, test, this);
     }
 
 	@Override
@@ -66,13 +66,13 @@ public class MicrounitRunner extends BlockJUnit4ClassRunner {
 
 	@Override
 	protected Statement withAfters(FrameworkMethod method, Object target, Statement statement) {
-		Statement next = new MicrounitAfter(method, this, statement, discoveryProvider, contextBuilder);
+		Statement next = new DockerUnitAfter(method, this, statement, discoveryProvider, contextBuilder);
 		return super.withAfters(method, target, next);
 	}
 	
 	@Override
 	protected Statement withAfterClasses(Statement statement) {
-		Statement next = new MicrounitAfterClass(this, statement, discoveryProvider, contextBuilder);
+		Statement next = new DockerUnitAfterClass(this, statement, discoveryProvider, contextBuilder);
 		return super.withAfterClasses(next);
 	}
 	
@@ -82,7 +82,7 @@ public class MicrounitRunner extends BlockJUnit4ClassRunner {
 		Statement next = super.withBeforeClasses(statement);
 		DependencyDescriptor descriptor = descriptorBuilder.buildDescriptor(getTestClass().getJavaClass());
 		DependencyDescriptor discoveryProviderDescriptor = descriptorBuilder.buildDescriptor(discoveryProvider.getDiscoveryConfig());
-		return new MicrounitBeforeClass(this, next, discoveryProvider, contextBuilder, descriptor, discoveryProviderDescriptor);
+		return new DockerUnitBeforeClass(this, next, discoveryProvider, contextBuilder, descriptor, discoveryProviderDescriptor);
 	}
 
 
@@ -90,7 +90,7 @@ public class MicrounitRunner extends BlockJUnit4ClassRunner {
 	protected Statement withBefores(FrameworkMethod method, Object target, Statement statement) {
 		Statement next =  super.withBefores(method, target, statement);
 		DependencyDescriptor descriptor = descriptorBuilder.buildDescriptor(method);
-		return new MicrounitBefore(method, this, next, discoveryProvider, contextBuilder, descriptor);
+		return new DockerUnitBefore(method, this, next, discoveryProvider, contextBuilder, descriptor);
 	}
 	
 	
