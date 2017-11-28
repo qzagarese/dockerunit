@@ -7,11 +7,11 @@ import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.Ports.Binding;
-import com.github.qzagarese.dockerunit.annotation.OptionBuilder;
+import com.github.qzagarese.dockerunit.annotation.ExtensionInterpreter;
 import com.github.qzagarese.dockerunit.annotation.PortBinding;
 import com.github.qzagarese.dockerunit.annotation.PortBinding.Protocol;
 
-public class PortBindingOptionBuilder implements OptionBuilder<PortBinding> {
+public class PortBindingExtensionInterpreter implements ExtensionInterpreter<PortBinding> {
 
     @Override
     public CreateContainerCmd build(CreateContainerCmd cmd, PortBinding pb) {

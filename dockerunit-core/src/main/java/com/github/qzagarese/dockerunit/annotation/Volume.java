@@ -6,12 +6,12 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import com.github.qzagarese.dockerunit.annotation.impl.VolumeOptionBuilder;
+import com.github.qzagarese.dockerunit.annotation.impl.VolumeExtensionInterpreter;
 
 @Retention(RUNTIME)
 @Target(TYPE)
 @Repeatable(Volumes.class)
-@OptionHandler(VolumeOptionBuilder.class)
+@ExtensionMarker(VolumeExtensionInterpreter.class)
 public @interface Volume {
 
     boolean useClasspath() default false;

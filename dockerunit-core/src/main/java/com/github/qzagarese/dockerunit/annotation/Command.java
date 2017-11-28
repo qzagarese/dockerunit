@@ -5,12 +5,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import com.github.qzagarese.dockerunit.annotation.impl.CommandOptionBuilder;
+import com.github.qzagarese.dockerunit.annotation.impl.CommandExtensionInterpreter;
 
 
 @Retention(RUNTIME)
 @Target(TYPE)
-@OptionHandler(CommandOptionBuilder.class)
+@ExtensionMarker(CommandExtensionInterpreter.class)
 public @interface Command {
 
     String[] value();

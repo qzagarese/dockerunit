@@ -6,11 +6,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import com.github.qzagarese.dockerunit.annotation.impl.VolumeWrapperOptionBuilder;
+import com.github.qzagarese.dockerunit.annotation.impl.VolumeWrapperExtensionInterpreter;
 
 @Retention(RUNTIME)
 @Target(TYPE)
-@OptionHandler(VolumeWrapperOptionBuilder.class)
+@ExtensionMarker(VolumeWrapperExtensionInterpreter.class)
 public @interface Volumes {
 
     Volume[] value();

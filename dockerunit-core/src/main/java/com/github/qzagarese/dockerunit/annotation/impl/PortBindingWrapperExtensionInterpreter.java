@@ -1,13 +1,13 @@
 package com.github.qzagarese.dockerunit.annotation.impl;
 
 import com.github.dockerjava.api.command.CreateContainerCmd;
-import com.github.qzagarese.dockerunit.annotation.OptionBuilder;
+import com.github.qzagarese.dockerunit.annotation.ExtensionInterpreter;
 import com.github.qzagarese.dockerunit.annotation.PortBinding;
 import com.github.qzagarese.dockerunit.annotation.PortBindings;
 
-public class PortBindingWrapperOptionBuilder implements OptionBuilder<PortBindings>{
+public class PortBindingWrapperExtensionInterpreter implements ExtensionInterpreter<PortBindings>{
 
-    private PortBindingOptionBuilder builder = new PortBindingOptionBuilder();
+    private PortBindingExtensionInterpreter builder = new PortBindingExtensionInterpreter();
     
     @Override
     public CreateContainerCmd build(CreateContainerCmd cmd, PortBindings pbs) {

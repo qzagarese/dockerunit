@@ -6,11 +6,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import com.github.qzagarese.dockerunit.annotation.impl.PortBindingWrapperOptionBuilder;
+import com.github.qzagarese.dockerunit.annotation.impl.PortBindingWrapperExtensionInterpreter;
 
 @Retention(RUNTIME)
 @Target(TYPE)
-@OptionHandler(PortBindingWrapperOptionBuilder.class)
+@ExtensionMarker(PortBindingWrapperExtensionInterpreter.class)
 public @interface PortBindings {
 
     PortBinding[] value();

@@ -7,12 +7,12 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import com.github.qzagarese.dockerunit.annotation.impl.PortBindingOptionBuilder;
+import com.github.qzagarese.dockerunit.annotation.impl.PortBindingExtensionInterpreter;
 
 @Retention(RUNTIME)
 @Target(TYPE)
 @Repeatable(PortBindings.class)
-@OptionHandler(PortBindingOptionBuilder.class)
+@ExtensionMarker(PortBindingExtensionInterpreter.class)
 public @interface PortBinding {
 
     int exposedPort();

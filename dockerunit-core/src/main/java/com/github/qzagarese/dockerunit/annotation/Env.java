@@ -5,12 +5,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import com.github.qzagarese.dockerunit.annotation.impl.EnvOptionBuilder;
+import com.github.qzagarese.dockerunit.annotation.impl.EnvExtensionInterpreter;
 
 
 @Retention(RUNTIME)
 @Target(TYPE)
-@OptionHandler(EnvOptionBuilder.class)
+@ExtensionMarker(EnvExtensionInterpreter.class)
 public @interface Env {
 
     String[] value();

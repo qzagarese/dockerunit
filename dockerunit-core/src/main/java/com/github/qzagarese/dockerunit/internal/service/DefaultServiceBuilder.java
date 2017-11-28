@@ -27,8 +27,8 @@ import com.github.qzagarese.dockerunit.Service;
 import com.github.qzagarese.dockerunit.ServiceInstance;
 import com.github.qzagarese.dockerunit.ServiceInstance.Status;
 import com.github.qzagarese.dockerunit.annotation.ContainerBuilder;
-import com.github.qzagarese.dockerunit.annotation.OptionBuilder;
-import com.github.qzagarese.dockerunit.annotation.OptionHandler;
+import com.github.qzagarese.dockerunit.annotation.ExtensionInterpreter;
+import com.github.qzagarese.dockerunit.annotation.ExtensionMarker;
 import com.github.qzagarese.dockerunit.annotation.Image.PullStrategy;
 import com.github.qzagarese.dockerunit.exception.ContainerException;
 import com.github.qzagarese.dockerunit.internal.ServiceBuilder;
@@ -196,14 +196,14 @@ public class DefaultServiceBuilder implements ServiceBuilder {
 
     private CreateContainerCmd executeOptionBuilders(TestDependency dependency, CreateContainerCmd cmd) {
         for (Annotation a : dependency.getOptions()) {
-            Class<? extends OptionBuilder<?>> builderType = a.annotationType().getAnnotation(OptionHandler.class)
+            Class<? extends ExtensionInterpreter<?>> builderType = a.annotationType().getAnnotation(ExtensionMarker.class)
                 .value();
-            OptionBuilder<?> builder = null;
+            ExtensionInterpreter<?> builder = null;
             Method buildMethod = null;
             try {
                 builder = builderType.newInstance();
             } catch (Exception e) {
-                throw new RuntimeException("Cannot instantiate " + OptionBuilder.class.getSimpleName() + " of type " + builderType.getSimpleName()
+                throw new RuntimeException("Cannot instantiate " + ExtensionInterpreter.class.getSimpleName() + " of type " + builderType.getSimpleName()
                                            + " to handle annotation " + a.annotationType().getSimpleName()
                                            + " that has been detected on class " + dependency.getInstance()
                                                .getClass()

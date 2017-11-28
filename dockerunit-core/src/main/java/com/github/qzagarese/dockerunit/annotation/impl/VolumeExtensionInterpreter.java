@@ -7,10 +7,10 @@ import java.util.List;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.model.AccessMode;
 import com.github.dockerjava.api.model.Bind;
-import com.github.qzagarese.dockerunit.annotation.OptionBuilder;
+import com.github.qzagarese.dockerunit.annotation.ExtensionInterpreter;
 import com.github.qzagarese.dockerunit.annotation.Volume;
 
-public class VolumeOptionBuilder implements OptionBuilder<Volume> {
+public class VolumeExtensionInterpreter implements ExtensionInterpreter<Volume> {
 
     @Override
     public CreateContainerCmd build(CreateContainerCmd cmd, Volume v) {

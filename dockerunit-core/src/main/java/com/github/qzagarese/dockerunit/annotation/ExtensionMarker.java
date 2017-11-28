@@ -8,8 +8,8 @@ import java.lang.annotation.Target;
 
 @Retention(RUNTIME)
 @Target(ANNOTATION_TYPE)
-public @interface OptionHandler {
+public @interface ExtensionMarker {
 
-    Class<? extends OptionBuilder<?>> value();
+    Class<? extends ExtensionInterpreter<?>> value();
     
 }

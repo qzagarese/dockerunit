@@ -5,11 +5,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import com.github.qzagarese.dockerunit.annotation.impl.PublishPortsOptionBuilder;
+import com.github.qzagarese.dockerunit.annotation.impl.PublishPortsExtensionInterpreter;
 
 @Retention(RUNTIME)
 @Target(TYPE)
-@OptionHandler(PublishPortsOptionBuilder.class)
+@ExtensionMarker(PublishPortsExtensionInterpreter.class)
 public @interface PublishPorts {
 
 }

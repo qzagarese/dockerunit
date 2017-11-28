@@ -4,7 +4,7 @@ import java.lang.annotation.Annotation;
 
 import com.github.dockerjava.api.command.CreateContainerCmd;
 
-public interface OptionBuilder<T extends Annotation> {
+public interface ExtensionInterpreter<T extends Annotation> {
 
     CreateContainerCmd build(CreateContainerCmd cmd, T t);
     

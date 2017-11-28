@@ -17,7 +17,7 @@ import com.github.qzagarese.dockerunit.annotation.ContainerBuilder;
 import com.github.qzagarese.dockerunit.annotation.Dependencies;
 import com.github.qzagarese.dockerunit.annotation.Image;
 import com.github.qzagarese.dockerunit.annotation.Named;
-import com.github.qzagarese.dockerunit.annotation.OptionHandler;
+import com.github.qzagarese.dockerunit.annotation.ExtensionMarker;
 import com.github.qzagarese.dockerunit.annotation.Use;
 import com.github.qzagarese.dockerunit.internal.DependencyDescriptor;
 import com.github.qzagarese.dockerunit.internal.TestDependency;
@@ -70,7 +70,7 @@ public class DefaultDependencyDescriptorBuilder implements DependencyDescriptorB
 
     private List<? extends Annotation> extractOptions(Class<?> service) {
         return Arrays.asList(service.getDeclaredAnnotations()).stream()
-            .filter(a -> a.annotationType().isAnnotationPresent(OptionHandler.class))
+            .filter(a -> a.annotationType().isAnnotationPresent(ExtensionMarker.class))
             .collect(Collectors.toList());
     }
 
