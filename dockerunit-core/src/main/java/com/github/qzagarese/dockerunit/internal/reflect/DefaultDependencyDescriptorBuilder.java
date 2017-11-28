@@ -15,13 +15,13 @@ import org.junit.runners.model.FrameworkMethod;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.qzagarese.dockerunit.annotation.ContainerBuilder;
 import com.github.qzagarese.dockerunit.annotation.Dependencies;
+import com.github.qzagarese.dockerunit.annotation.ExtensionMarker;
 import com.github.qzagarese.dockerunit.annotation.Image;
 import com.github.qzagarese.dockerunit.annotation.Named;
-import com.github.qzagarese.dockerunit.annotation.ExtensionMarker;
 import com.github.qzagarese.dockerunit.annotation.Use;
 import com.github.qzagarese.dockerunit.internal.DependencyDescriptor;
-import com.github.qzagarese.dockerunit.internal.TestDependency;
-import com.github.qzagarese.dockerunit.internal.reflect.DefaultTestDependency.DefaultTestDependencyBuilder;
+import com.github.qzagarese.dockerunit.internal.TestDescriptor;
+import com.github.qzagarese.dockerunit.internal.reflect.DefaultTestDescriptor.DefaultTestDescriptorBuilder;
 
 public class DefaultDependencyDescriptorBuilder implements DependencyDescriptorBuilder {
 
@@ -38,19 +38,19 @@ public class DefaultDependencyDescriptorBuilder implements DependencyDescriptorB
     
     private DependencyDescriptor buildDescriptor(AnnotatedElement element) {
     	List<Use> requirements = getDependencies(element);
-        List<TestDependency> descriptors = asDescriptors(requirements);
+        List<TestDescriptor> descriptors = asDescriptors(requirements);
         return new DefaultDependencyDescriptor(descriptors);
     }
     
-    private List<TestDependency> asDescriptors(List<Use> requirements) {
-        List<TestDependency> descriptors = requirements.stream()
+    private List<TestDescriptor> asDescriptors(List<Use> requirements) {
+        List<TestDescriptor> descriptors = requirements.stream()
             .map(use -> buildDescriptor(use))
             .collect(Collectors.toList());
         return descriptors;
     }
 
-    private TestDependency buildDescriptor(Use use) {
-        DefaultTestDependencyBuilder builder = DefaultTestDependency.builder();
+    private TestDescriptor buildDescriptor(Use use) {
+        DefaultTestDescriptorBuilder builder = DefaultTestDescriptor.builder();
         
         checkServiceClass(use.service());
         try {

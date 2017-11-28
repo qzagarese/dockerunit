@@ -6,14 +6,14 @@ import java.util.List;
 
 import com.github.qzagarese.dockerunit.annotation.Image;
 import com.github.qzagarese.dockerunit.annotation.Named;
-import com.github.qzagarese.dockerunit.internal.TestDependency;
+import com.github.qzagarese.dockerunit.internal.TestDescriptor;
 
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
-public class DefaultTestDependency implements TestDependency {
+public class DefaultTestDescriptor implements TestDescriptor {
 
     private Image image;
     private Named named;

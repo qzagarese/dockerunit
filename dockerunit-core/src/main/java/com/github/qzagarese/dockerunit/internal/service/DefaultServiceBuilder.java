@@ -32,34 +32,34 @@ import com.github.qzagarese.dockerunit.annotation.ExtensionMarker;
 import com.github.qzagarese.dockerunit.annotation.Image.PullStrategy;
 import com.github.qzagarese.dockerunit.exception.ContainerException;
 import com.github.qzagarese.dockerunit.internal.ServiceBuilder;
-import com.github.qzagarese.dockerunit.internal.TestDependency;
+import com.github.qzagarese.dockerunit.internal.TestDescriptor;
 
 public class DefaultServiceBuilder implements ServiceBuilder {
 
 	private final Logger logger = Logger.getLogger(this.getClass().getSimpleName());
 	
     @Override
-    public Service build(TestDependency dependency, DockerClient client) {
+    public Service build(TestDescriptor descriptor, DockerClient client) {
         Set<ServiceInstance> instances = new HashSet<>();
-        for (int i = 0; i < dependency.getReplicas(); i++) {
-            instances.add(createInstance(dependency, client, i));
+        for (int i = 0; i < descriptor.getReplicas(); i++) {
+            instances.add(createInstance(descriptor, client, i));
         }
-        return new Service(dependency.getNamed()
+        return new Service(descriptor.getNamed()
             .value(), instances);
     }
 
-    private ServiceInstance createInstance(TestDependency dependency, DockerClient client, int i) {
-        CreateContainerCmd cmd = client.createContainerCmd(dependency.getImage().value());
-        cmd = computeContainerName(dependency, i, cmd);
-        cmd = executeOptionBuilders(dependency, cmd);
-        if (dependency.getCustomisationHook() != null) {
-            cmd = executeCustomisationHook(dependency.getCustomisationHook(), dependency.getInstance(), cmd);
+    private ServiceInstance createInstance(TestDescriptor descriptor, DockerClient client, int i) {
+        CreateContainerCmd cmd = client.createContainerCmd(descriptor.getImage().value());
+        cmd = computeContainerName(descriptor, i, cmd);
+        cmd = executeOptionBuilders(descriptor, cmd);
+        if (descriptor.getCustomisationHook() != null) {
+            cmd = executeCustomisationHook(descriptor.getCustomisationHook(), descriptor.getInstance(), cmd);
         }
         String containerId = null;
         Status status = null;
         String statusDetails = null;
 		try {
-			containerId = createAndStartContainer(cmd, dependency.getImage().pull(),  client);
+			containerId = createAndStartContainer(cmd, descriptor.getImage().pull(),  client);
 			status = Status.STARTED;
 			statusDetails = "Started.";
 		} catch (Throwable t) {
@@ -83,7 +83,7 @@ public class DefaultServiceBuilder implements ServiceBuilder {
                 .build();
     }
 
-	private CreateContainerCmd computeContainerName(TestDependency dependency, int i, CreateContainerCmd cmd) {
+	private CreateContainerCmd computeContainerName(TestDescriptor dependency, int i, CreateContainerCmd cmd) {
 		if (!dependency.getContainerName()
             .isEmpty()) {
             String name = dependency.getReplicas() > 1 
@@ -194,8 +194,8 @@ public class DefaultServiceBuilder implements ServiceBuilder {
         return cmd;
     }
 
-    private CreateContainerCmd executeOptionBuilders(TestDependency dependency, CreateContainerCmd cmd) {
-        for (Annotation a : dependency.getOptions()) {
+    private CreateContainerCmd executeOptionBuilders(TestDescriptor descriptor, CreateContainerCmd cmd) {
+        for (Annotation a : descriptor.getOptions()) {
             Class<? extends ExtensionInterpreter<?>> builderType = a.annotationType().getAnnotation(ExtensionMarker.class)
                 .value();
             ExtensionInterpreter<?> builder = null;
@@ -205,14 +205,14 @@ public class DefaultServiceBuilder implements ServiceBuilder {
             } catch (Exception e) {
                 throw new RuntimeException("Cannot instantiate " + ExtensionInterpreter.class.getSimpleName() + " of type " + builderType.getSimpleName()
                                            + " to handle annotation " + a.annotationType().getSimpleName()
-                                           + " that has been detected on class " + dependency.getInstance()
+                                           + " that has been detected on class " + descriptor.getInstance()
                                                .getClass()
                                                .getName(),
                     e);
             }
             try {
-            	buildMethod = builderType.getDeclaredMethod("build", new Class<?>[] { CreateContainerCmd.class, a.annotationType() });
-                cmd = (CreateContainerCmd) buildMethod.invoke(builder, cmd, a);
+            	buildMethod = builderType.getDeclaredMethod("build", new Class<?>[] {TestDescriptor.class, CreateContainerCmd.class, a.annotationType() });
+                cmd = (CreateContainerCmd) buildMethod.invoke(builder, descriptor, cmd, a);
             } catch (Exception e) {
                 throw new RuntimeException(
                     "An error occurred while invoking the build method on builder class " + builderType.getName(), e);

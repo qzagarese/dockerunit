@@ -9,11 +9,12 @@ import com.github.dockerjava.api.model.AccessMode;
 import com.github.dockerjava.api.model.Bind;
 import com.github.qzagarese.dockerunit.annotation.ExtensionInterpreter;
 import com.github.qzagarese.dockerunit.annotation.Volume;
+import com.github.qzagarese.dockerunit.internal.TestDescriptor;
 
 public class VolumeExtensionInterpreter implements ExtensionInterpreter<Volume> {
 
     @Override
-    public CreateContainerCmd build(CreateContainerCmd cmd, Volume v) {
+    public CreateContainerCmd build(TestDescriptor td, CreateContainerCmd cmd, Volume v) {
     	Bind[] binds = cmd.getBinds();
     	
     	String hostPath = v.useClasspath() 

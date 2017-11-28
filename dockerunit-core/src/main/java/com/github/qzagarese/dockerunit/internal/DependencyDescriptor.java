@@ -4,6 +4,6 @@ import java.util.List;
 
 public interface DependencyDescriptor {
 
-    List<TestDependency> getDependencies();
+    List<TestDescriptor> getDependencies();
     
 }

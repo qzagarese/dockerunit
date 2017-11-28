@@ -10,11 +10,12 @@ import com.github.dockerjava.api.model.Ports.Binding;
 import com.github.qzagarese.dockerunit.annotation.ExtensionInterpreter;
 import com.github.qzagarese.dockerunit.annotation.PortBinding;
 import com.github.qzagarese.dockerunit.annotation.PortBinding.Protocol;
+import com.github.qzagarese.dockerunit.internal.TestDescriptor;
 
 public class PortBindingExtensionInterpreter implements ExtensionInterpreter<PortBinding> {
 
     @Override
-    public CreateContainerCmd build(CreateContainerCmd cmd, PortBinding pb) {
+    public CreateContainerCmd build(TestDescriptor td, CreateContainerCmd cmd, PortBinding pb) {
         List<ExposedPort> ports = new ArrayList<>(Arrays.asList(cmd.getExposedPorts()));
         ExposedPort containerPort = pb.protocol()
             .equals(Protocol.TCP) ? ExposedPort.tcp(pb.exposedPort()) : ExposedPort.udp(pb.exposedPort());
