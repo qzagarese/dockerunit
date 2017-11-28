@@ -8,6 +8,11 @@ import java.lang.annotation.Target;
 
 import com.github.qzagarese.dockerunit.annotation.impl.PortBindingWrapperExtensionInterpreter;
 
+/**
+ * 
+ * Wrapper annotation to allow multiple declarations of {@linkplain PortBinding}
+ * 
+ */
 @Retention(RUNTIME)
 @Target(TYPE)
 @ExtensionMarker(PortBindingWrapperExtensionInterpreter.class)

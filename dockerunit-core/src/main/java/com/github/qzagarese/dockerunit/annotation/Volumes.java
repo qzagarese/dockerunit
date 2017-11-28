@@ -8,6 +8,11 @@ import java.lang.annotation.Target;
 
 import com.github.qzagarese.dockerunit.annotation.impl.VolumeWrapperExtensionInterpreter;
 
+/**
+ * 
+ * Wrapper annotation to allow repeated usage of {@linkplain Volume}
+ *
+ */
 @Retention(RUNTIME)
 @Target(TYPE)
 @ExtensionMarker(VolumeWrapperExtensionInterpreter.class)

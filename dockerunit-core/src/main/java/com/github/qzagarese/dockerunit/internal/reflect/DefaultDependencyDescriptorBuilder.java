@@ -14,7 +14,7 @@ import org.junit.runners.model.FrameworkMethod;
 
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.qzagarese.dockerunit.annotation.ContainerBuilder;
-import com.github.qzagarese.dockerunit.annotation.Dependencies;
+import com.github.qzagarese.dockerunit.annotation.Usages;
 import com.github.qzagarese.dockerunit.annotation.ExtensionMarker;
 import com.github.qzagarese.dockerunit.annotation.Image;
 import com.github.qzagarese.dockerunit.annotation.Named;
@@ -164,8 +164,8 @@ public class DefaultDependencyDescriptorBuilder implements DependencyDescriptorB
     }
     
     private List<Use> getDependencies(AnnotatedElement element) {
-        Use[] requirements = element.isAnnotationPresent(Dependencies.class)
-                    ? element.getAnnotation(Dependencies.class)
+        Use[] requirements = element.isAnnotationPresent(Usages.class)
+                    ? element.getAnnotation(Usages.class)
                         .value()
                     : new Use[] {};
         if(requirements.length == 0 && element.isAnnotationPresent(Use.class)) {

@@ -7,7 +7,20 @@ import java.lang.annotation.Target;
 
 import com.github.qzagarese.dockerunit.annotation.impl.EnvExtensionInterpreter;
 
-
+/**
+ * 
+ * Allows declaration of environment variables for your service.
+ * Declared values will be passed to every instance of your service.
+ * 
+ * The example below set variables FOO and BAR to values foo and bar respectively.
+ * 
+ * <pre>
+ * {@code
+ *	@Env({"FOO=foo", "BAR=bar"}) 
+ * }
+ * </pre>
+ *
+ */
 @Retention(RUNTIME)
 @Target(TYPE)
 @ExtensionMarker(EnvExtensionInterpreter.class)

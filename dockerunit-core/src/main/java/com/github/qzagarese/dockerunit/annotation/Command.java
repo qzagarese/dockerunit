@@ -8,6 +8,12 @@ import java.lang.annotation.Target;
 import com.github.qzagarese.dockerunit.annotation.impl.CommandExtensionInterpreter;
 
 
+/**
+ * 
+ * Provides a command that should be executed when running the container.
+ * Equivalent to providing a command after docker run <image_name> 
+ *
+ */
 @Retention(RUNTIME)
 @Target(TYPE)
 @ExtensionMarker(CommandExtensionInterpreter.class)

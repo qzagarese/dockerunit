@@ -7,9 +7,15 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+/**
+ * 
+ * Wrapper annotation for repeated use of {@linkplain Use} 
+ * on a class or a method
+ *
+ */
 @Retention(RUNTIME)
 @Target({ TYPE, METHOD })
-public @interface Dependencies {
+public @interface Usages {
 
     Use[] value();
 
