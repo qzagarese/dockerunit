@@ -14,10 +14,10 @@ import java.lang.annotation.Target;
  * 
  * It can be used at class and method level.
  * If used at class level, the referenced services will be started before JUnit 
- * executes your {@code @BeforeClass} method.
+ * executes your {@code {@literal@}BeforeClass} method.
  * 
  * If used at method level, the referenced services will be started before JUnit 
- * executes your {@code @Before} method.
+ * executes your {@code {@literal@}Before} method.
  * 
  * It can also be used at class and method level at the same time, if some
  * services will be used by all the tests in your class, 

@@ -21,7 +21,7 @@ public @interface WebHealthCheck {
 
 	/**
 	 * The path of the health check endpoint in your service.
-	 * Default is {@value /health-check}
+	 * Default is {@literal /health-check}
 	 * 
 	 * @return the health check endpoint
 	 */

@@ -49,7 +49,7 @@ public class ServiceInstance {
     	/**
     	 * The instance has been successfully terminated either because the 
     	 * test has completed or because there was an error and the previous state
-    	 * was {@code ABORTED}
+    	 * was {@literal ABORTED}
     	 */
     	TERMINATED, 
     	
@@ -70,8 +70,8 @@ public class ServiceInstance {
 	/**
 	 * Provides the ip of this service instance.
 	 * Currently, the ip of the Docker bridge interface on your machine.
-	 * By default Dockerunit uses {@value 172.17.42.1}.
-	 * You can override this by using the {@value -Ddocker.bridge.ip} system property.
+	 * By default Dockerunit uses {@literal 172.17.42.1}.
+	 * You can override this by using the {@literal -Ddocker.bridge.ip} system property.
 	 * 
 	 * <pre>
 	 * {@code
@@ -88,7 +88,7 @@ public class ServiceInstance {
 	/**
 	 * Provides the port this instance is listening on.
 	 * If you are running a single instance and you are using {@linkplain PortBinding},
-	 * then this returns the value of the {@value hostPort} property.
+	 * then this returns the value of the {@literal hostPort} property.
 	 * If you are running multiple instances, then you need to use {@linkplain PublishPorts}.
 	 * In this case, this return the port that Docker has dynamically assigned
 	 * to the underlying container.

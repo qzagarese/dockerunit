@@ -16,7 +16,7 @@ import com.github.qzagarese.dockerunit.annotation.impl.EnvExtensionInterpreter;
  * 
  * <pre>
  * {@code
- *	@Env({"FOO=foo", "BAR=bar"}) 
+ *	{@literal@}Env({"FOO=foo", "BAR=bar"}) 
  * }
  * </pre>
  *

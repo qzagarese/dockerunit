@@ -32,7 +32,7 @@ import com.github.qzagarese.dockerunit.internal.reflect.DependencyDescriptorBuil
  * 
  * <pre>
  * {@code 
- * @RunWith(DockerUnitRunner.class)
+ * {@literal@}RunWith(DockerUnitRunner.class)
  * public class MyTestClass {
  * }
  * }

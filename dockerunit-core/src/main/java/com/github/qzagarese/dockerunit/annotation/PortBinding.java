@@ -11,7 +11,7 @@ import com.github.qzagarese.dockerunit.annotation.impl.PortBindingExtensionInter
 
 /**
  * 
- * Equivalent of {@value -p} option in docker run.
+ * Equivalent of {@literal -p} option in docker run.
  * Exposes a container port on the host network interface.
  *
  */

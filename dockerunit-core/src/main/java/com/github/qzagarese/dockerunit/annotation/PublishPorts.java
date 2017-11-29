@@ -12,7 +12,7 @@ import com.github.qzagarese.dockerunit.annotation.impl.PublishPortsExtensionInte
 
 /**
  * 
- * Equivalent of {@value -P} in docker run
+ * Equivalent of {@literal -P} in docker run
  * Tells Docker to map every port that is exposed by the container on a randomly
  * port on the host network interface.
  * 

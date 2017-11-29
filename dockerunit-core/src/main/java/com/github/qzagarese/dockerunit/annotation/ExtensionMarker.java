@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * Meta-annotation that allows the creation of extensions for Dockerunit.
  * 
  * 1) Create your annotation.}
- * 2) Mark it with {@code @ExtensionMarker}
+ * 2) Mark it with {@code {@literal@}ExtensionMarker}
  * 3) Create an interpreter that will apply changes to the 
  * 	  Docker container based on the annotation value.
  * 
