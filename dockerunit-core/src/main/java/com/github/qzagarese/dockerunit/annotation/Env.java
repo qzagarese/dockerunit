@@ -15,9 +15,7 @@ import com.github.qzagarese.dockerunit.annotation.impl.EnvExtensionInterpreter;
  * The example below set variables FOO and BAR to values foo and bar respectively.
  * 
  * <pre>
- * {@code
- *	{@literal@}Env({"FOO=foo", "BAR=bar"}) 
- * }
+ *	&#64;Env({"FOO=foo", "BAR=bar"}) 
  * </pre>
  *
  */

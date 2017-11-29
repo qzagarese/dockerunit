@@ -11,7 +11,11 @@ import com.github.qzagarese.dockerunit.annotation.impl.CommandExtensionInterpret
 /**
  * 
  * Provides a command that should be executed when running the container.
- * Equivalent to providing a command after {@literal docker run image_name} 
+ * Equivalent to providing a command after 
+ * 
+ * <pre>
+ * docker run image_name
+ * </pre> 
  *
  */
 @Retention(RUNTIME)

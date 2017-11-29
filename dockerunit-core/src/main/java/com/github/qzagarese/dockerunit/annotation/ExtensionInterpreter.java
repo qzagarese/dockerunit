@@ -10,24 +10,23 @@ import com.github.qzagarese.dockerunit.internal.TestDescriptor;
  * Definition of an annotation interpreter.
  * Extending Dockerunit consists of:
  * 1) Declaring an annotation
- * 2) Marking it with {@code {@literal@}ExtensionMarker}
+ * 2) Marking it with &#64;ExtensionMarker
  * 3) Providing an interpreter for the created annotation 
  * 		that applies changes to the Docker container based on the annotation value.
  *
  * <pre> 
  * {@code 
- *  {@literal@}ExtensionMarker(MyDnsAnnotationInterpreter.class)
+ *  [at]ExtensionMarker(MyDnsAnnotationInterpreter.class)
  * 	public @interface MyDnsAnnotation {
  * 		String value() default "8.8.4.4";
  *  }
  *  
  *  public class MyDnsAnnotationInterpreter implements ExtensionInterpreter<MyDnsAnnotation> {
  *  
- *  	{@literal@}Override
- *      public CreateContainerCmd build(TestDescriptor td, CreateContainerCmd cmd, MyDnsAnnotation t) {
- *      	return cmd.withDns(t.value());
- *		}
- *  
+ *    [at]Override
+ *    public CreateContainerCmd build(TestDescriptor td, CreateContainerCmd cmd, MyDnsAnnotation t) {
+ *      return cmd.withDns(t.value());
+ *    }
  *  }
  * }
  * </pre>

@@ -31,10 +31,8 @@ import com.github.qzagarese.dockerunit.internal.reflect.DependencyDescriptorBuil
  * Use this runner to enable Dockerunit in your tests.
  * 
  * <pre>
- * {@code 
- * {@literal@}RunWith(DockerUnitRunner.class)
+ * &#64;RunWith(DockerUnitRunner.class)
  * public class MyTestClass {
- * }
  * }
  * </pre>
  * 

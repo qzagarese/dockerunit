@@ -74,9 +74,7 @@ public class ServiceInstance {
 	 * You can override this by using the {@literal -Ddocker.bridge.ip} system property.
 	 * 
 	 * <pre>
-	 * {@code
 	 * mvn test -Ddocker.bridge.ip=172.17.0.1
-	 * }
 	 * </pre>
 	 * 
 	 * @return the ip of the service instance. 

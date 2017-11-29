@@ -17,13 +17,14 @@ import lombok.experimental.Wither;
  * 
  * Represents a discoverable container or group of Docker containers.
  * Each container is based on the declared image.
- * @see Image
  * 
  * It has at least one instance (container) and it is healthy if and only
  * if all its instances are healthy.
  * 
  * The service name is used to instruct the {@link DiscoveryProvider} and 
  * make the service discoverable by  other services.
+
+ * @see Image
  * @see Named
  *
  */

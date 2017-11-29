@@ -19,10 +19,9 @@ import com.github.dockerjava.api.command.CreateContainerCmd;
  * 
  * The example below shows how to set the Google dns as the dns for your container
  * <pre>
- * {@code
+ * &#64;ContainerBuilder
  * public CreateContainerCmd build(CreateContainerCmd cmd) {
  * 	return cmd.withDns("8.8.4.4");
- * } 
  * }
  * </pre>
  *
