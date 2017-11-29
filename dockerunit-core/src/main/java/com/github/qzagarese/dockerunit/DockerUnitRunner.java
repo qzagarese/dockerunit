@@ -27,7 +27,7 @@ import com.github.qzagarese.dockerunit.internal.lifecycle.DockerUnitBeforeClass;
 import com.github.qzagarese.dockerunit.internal.reflect.DependencyDescriptorBuilder;
 import com.github.qzagarese.dockerunit.internal.reflect.DependencyDescriptorBuilderFactory;
 
-/*
+/**
  * Use this runner to enable Dockerunit in your tests.
  * 
  * <pre>
