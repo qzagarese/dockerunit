@@ -51,10 +51,14 @@ import com.github.qzagarese.dockerunit.discovery.consul.annotation.WebHealthChec
 // Selects the Docker image to use. It can contain a registry name.
 @Image("my-spring-service-image:latest")      
 
-/* Maps the container port 8080 on the same host port number (equivalent to `docker run -p 8080:8080 my-spring-service-image:latest`) */ 
+/* Maps the container port 8080 on the same host port number 
+(equivalent to `docker run -p 8080:8080 my-spring-service-image:latest`) */ 
 @PortBinding(exposedPort=8080, hostPort=8080) 
 
-/* Tells Consul how to monitor the state of your service. You should always provide a health check endpoint. If not, Dockerunit cannot guarantee your service started successfully, before your test invokes its endpoints. */  
+/* Tells Consul how to monitor the state of your service. 
+You should always provide a health check endpoint. 
+If not, Dockerunit cannot guarantee your service started successfully, 
+before your test invokes its endpoints. */  
 @WebHealthCheck(exposedPort=8080, endpoint="/health-check")
 public class MyServiceDescriptor {
 }
