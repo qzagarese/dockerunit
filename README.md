@@ -1,5 +1,4 @@
 # Dockerunit - JUnit for Docker containers
-====================================================
 
 Dockerunit is an extensible framework for testing of dockerised services and applications.
 It is based on JUnit and it allows linking of Docker images to Java tests by means of Java annotations.
@@ -46,10 +45,17 @@ import com.github.qzagarese.dockerunit.annotation.Named;
 import com.github.qzagarese.dockerunit.annotation.PortBinding;
 import com.github.qzagarese.dockerunit.discovery.consul.annotation.WebHealthCheck;
 
-@Named("my-spring-service")                   // Gives a name to your a service. Consul will put a dns entry on `my-spring-service.service.consul`.
-@Image("my-spring-service-image:latest")      // Selects the Docker image to use. It can contain a registry name.
-@PortBinding(exposedPort=8080, hostPort=8080) // Maps the container port 8080 on the same host port number (equivalent to `docker run -p 8080:8080 my-spring-service-image:latest`) 
-@WebHealthCheck(exposedPort=8080, endpoint="/health-check")             // Tells Consul how to monitor the state of your service. You should always provide a health check endpoint. If not, Dockerunit cannot guarantee your service started successfully, before your test invokes its endpoints.  
+// Gives a name to your service. Consul will put a dns entry on `my-spring-service.service.consul`.
+@Named("my-spring-service")
+
+// Selects the Docker image to use. It can contain a registry name.
+@Image("my-spring-service-image:latest")      
+
+/* Maps the container port 8080 on the same host port number (equivalent to `docker run -p 8080:8080 my-spring-service-image:latest`) */ 
+@PortBinding(exposedPort=8080, hostPort=8080) 
+
+/* Tells Consul how to monitor the state of your service. You should always provide a health check endpoint. If not, Dockerunit cannot guarantee your service started successfully, before your test invokes its endpoints. */  
+@WebHealthCheck(exposedPort=8080, endpoint="/health-check")
 public class MyServiceDescriptor {
 }
 ```
