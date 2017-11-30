@@ -29,8 +29,6 @@ public interface ServiceContext {
     
     ServiceContext merge(ServiceContext context);
     
-	ServiceContext mergeInstances(ServiceContext classContext);
-	
 	ServiceContext subtract(ServiceContext context);
 	
 	boolean allHealthy();

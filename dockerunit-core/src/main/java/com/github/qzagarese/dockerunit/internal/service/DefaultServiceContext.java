@@ -30,17 +30,33 @@ public class DefaultServiceContext implements ServiceContext {
 
 	@Override
 	public ServiceContext merge(ServiceContext context) {
-		return doMerge(context, false);
-	}
+		DefaultServiceContext clone = new DefaultServiceContext(new HashSet<>(services.values()));
 
-	@Override
-	public ServiceContext mergeInstances(ServiceContext context) {
-		return doMerge(context, true);
+		if(context != null) {
+			Set<Service> servicesSet = clone.getServices().stream()
+					.map(s -> {
+						Service s2 = context.getService(s.getName());
+						if(s2 == null) {
+							return s;
+						} else {
+							Set<ServiceInstance> augmented = s.getInstances();
+							augmented.addAll(s2.getInstances());
+							return s.withInstances(augmented);
+						}
+					}).collect(Collectors.toSet());
+			Set<Service> toAdd = context.getServices().stream()
+					.filter(s -> clone.getService(s.getName()) == null)
+					.collect(Collectors.toSet());
+			servicesSet.addAll(toAdd);
+			return new DefaultServiceContext(servicesSet);
+		}
+		return clone;
 	}
 
 	@Override
 	public boolean allHealthy() {
-		return services.values().stream()
+		return services.isEmpty() ||
+				services.values().stream()
 				.map(s -> s.isHealthy())
 				.reduce((b1, b2) -> b1 && b2)
 				.get();
@@ -58,31 +74,11 @@ public class DefaultServiceContext implements ServiceContext {
 			.get();
 	}
 
-	private ServiceContext doMerge(ServiceContext context, boolean commonSvcsOnly) {
-		DefaultServiceContext clone = new DefaultServiceContext(new HashSet<>(services.values()));
-		if(context != null) {
-			Set<Service> servicesList = context.getServices().stream()
-				.filter(s -> clone.getService(s.getName()) != null || !commonSvcsOnly) 	
-				.map(s -> {
-					Service s2 = clone.getService(s.getName());
-					if(s2 != null) {
-						Set<ServiceInstance> instances = new HashSet<>(s2.getInstances());
-						instances.addAll(s.getInstances());
-						return s2.withInstances(instances);
-					} else {
-						return s;
-					}
-				}).collect(Collectors.toSet());
-			return new DefaultServiceContext(servicesList);
-		}
-		return clone;
-	}
-
 	@Override
 	public ServiceContext subtract(ServiceContext context) {
 		DefaultServiceContext clone = new DefaultServiceContext(new HashSet<>(services.values()));
 		if(context != null) {
-			Set<Service> servicesList = clone.getServices().stream()
+			Set<Service> servicesSet = clone.getServices().stream()
 					.map(s -> {
 						Service s2 = context.getService(s.getName());
 						if(s2 == null) {
@@ -95,7 +91,7 @@ public class DefaultServiceContext implements ServiceContext {
 					})
 					.filter(s -> s != null)
 					.collect(Collectors.toSet());
-			return new DefaultServiceContext(servicesList);
+			return new DefaultServiceContext(servicesSet);
 		}
 		return clone;
 	}

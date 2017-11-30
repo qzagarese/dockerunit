@@ -28,7 +28,7 @@ public class DockerUnitBefore extends Statement {
         if(!context.allHealthy()) {
         	throw new RuntimeException(context.getFormattedErrors());
         }
-        context = discoveryProvider.populateRegistry(context.mergeInstances(runner.getClassContext()));
+        context = discoveryProvider.populateRegistry(context.merge(runner.getClassContext()));
         runner.setContext(method, context);
         if(!context.allHealthy()) {
         	throw new RuntimeException(context.getFormattedErrors());
