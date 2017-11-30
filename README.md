@@ -86,12 +86,16 @@ public class MyServiceTest {
 	@Test
 	@Use(service=MyServiceDescriptor.class) // Selects the previously defined descriptor
 	public void healthCheckShouldReturn200(ServiceContext context) {
-		Service s = context.getService("my-spring-service"); // Gets the service based on value in the @Named annotation
-		ServiceInstance si = s.getInstances().stream().findAny().get(); // Selects the available instance (you could declare more than one)
+		// Gets the service based on value in the @Named annotation
+		Service s = context.getService("my-spring-service"); 
+		// Selects an available instance (you could declare more than one)
+		ServiceInstance si = s.getInstances().stream().findAny().get(); 
 		
 		RestAssured
 			.given()
-				.baseUri("http://" + si.getIp() + ":" + si.getPort()) // Uses the ip and port of the instance. The port could be dynamic if @PublishPorts is used
+				/* Uses the ip and port of the instance. 
+				The port could be dynamic if @PublishPorts is used */
+				.baseUri("http://" + si.getIp() + ":" + si.getPort()) 
 			.when()
 				.get("/health-check") // Hits the health-check endpoint 
 			.then()
