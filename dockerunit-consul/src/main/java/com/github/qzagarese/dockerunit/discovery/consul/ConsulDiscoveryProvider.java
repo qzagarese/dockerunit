@@ -5,6 +5,7 @@ import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryCo
 import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.DNS_POLLING_PERIOD_DEFAULT;
 import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.DOCKER_BRIDGE_IP_DEFAULT;
 import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.DOCKER_BRIDGE_IP_PROPERTY;
+import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.DOCKER_HOST_PROPERTY;
 import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.SERVICE_DISCOVERY_TIMEOUT;
 import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.SERVICE_DISCOVERY_TIMEOUT_DEFAULT;
 
@@ -28,8 +29,8 @@ import io.vertx.core.dns.SrvRecord;
 
 public class ConsulDiscoveryProvider implements DiscoveryProvider {
 
-	private static final String DOCKER_BRIDGE_IP = System.getProperty(DOCKER_BRIDGE_IP_PROPERTY, 
-			DOCKER_BRIDGE_IP_DEFAULT);
+	private static final String DOCKER_HOST = System.getProperty(DOCKER_HOST_PROPERTY, 
+			System.getProperty(DOCKER_BRIDGE_IP_PROPERTY, DOCKER_BRIDGE_IP_DEFAULT));
 	private final DnsResolver resolver;
 	private final DockerClient dockerClient;
 	private final int discoveryTimeout;
@@ -38,7 +39,7 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 	static final String CONSUL_DNS_SUFFIX = ".service.consul";
 	
 	public ConsulDiscoveryProvider() {
-		resolver = new DnsResolver(DOCKER_BRIDGE_IP, CONSUL_DNS_PORT);
+		resolver = new DnsResolver(DOCKER_HOST, CONSUL_DNS_PORT);
 		discoveryTimeout = Integer.parseInt(System.getProperty(SERVICE_DISCOVERY_TIMEOUT, 
 				SERVICE_DISCOVERY_TIMEOUT_DEFAULT));
 		dnsPollingFrequency = Integer.parseInt(System.getProperty(DNS_POLLING_PERIOD, DNS_POLLING_PERIOD_DEFAULT));
@@ -82,7 +83,7 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 				.map(si -> {
 					InspectContainerResponse r = dockerClient.inspectContainerCmd(si.getContainerId()).exec();
 					return si.withPort(findPort(r, records))
-							.withIp(DOCKER_BRIDGE_IP)
+							.withIp(DOCKER_HOST)
 							.withStatus(Status.DISCOVERED)
 							.withStatusDetails("Discovered via consul + registrator");					
 				}).collect(Collectors.toSet());

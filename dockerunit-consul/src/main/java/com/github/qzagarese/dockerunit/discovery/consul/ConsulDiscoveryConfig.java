@@ -8,6 +8,7 @@ public class ConsulDiscoveryConfig {
 
 	static final String DOCKER_BRIDGE_IP_PROPERTY = "docker.bridge.ip";
 	static final String DOCKER_BRIDGE_IP_DEFAULT = "172.17.42.1";
+	static final String DOCKER_HOST_PROPERTY = "docker.host";
 	static final String SERVICE_DISCOVERY_TIMEOUT = "service.discovery.timeout";
 	static final String SERVICE_DISCOVERY_TIMEOUT_DEFAULT = "30";
 	static final String DNS_POLLING_PERIOD = "dns.polling.period";
