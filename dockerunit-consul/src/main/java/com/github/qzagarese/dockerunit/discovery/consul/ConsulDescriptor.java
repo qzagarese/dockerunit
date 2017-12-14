@@ -1,8 +1,5 @@
 package com.github.qzagarese.dockerunit.discovery.consul;
 
-import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.DOCKER_BRIDGE_IP_DEFAULT;
-import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.DOCKER_BRIDGE_IP_PROPERTY;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,8 +22,6 @@ public class ConsulDescriptor {
 
 	@ContainerBuilder
 	public CreateContainerCmd setup(CreateContainerCmd cmd) {
-		String dockerBridgeIp = System.getProperty(DOCKER_BRIDGE_IP_PROPERTY, DOCKER_BRIDGE_IP_DEFAULT);
-		
 		List<ExposedPort> ports = new ArrayList<>(Arrays.asList(cmd.getExposedPorts()));
         ExposedPort dnsPort = ExposedPort.udp(CONSUL_DNS_PORT);
         ports.add(dnsPort);
@@ -39,8 +34,8 @@ public class ConsulDescriptor {
             bindings = new Ports();
         }
         
-        bindings.bind(dnsPort, Binding.bindIpAndPort(dockerBridgeIp, 8600));
-        bindings.bind(consulPort, Binding.bindIpAndPort(dockerBridgeIp, 8500));
+        bindings.bind(dnsPort, Binding.bindPort(8600));
+        bindings.bind(consulPort, Binding.bindPort(8500));
 
         return cmd.withExposedPorts(ports)
             .withPortBindings(bindings)
