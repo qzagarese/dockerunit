@@ -23,7 +23,7 @@ public class MyDescriptor {}
 ``` 
 The snippet above mounts the `application.properties` file from the `src/test/resources` directory inside your project.
 
-This way you can easily mount, inside your Docker container, different config files for different tests.
+This way you can easily mount different config files for different tests inside your Docker container.
 
 ### Passing an environment variable
 ```java
@@ -119,7 +119,7 @@ public class MyTestClass {
 ``` 
 Dockerunit starts service A, performs discovery (make sure you expose a health-check endpoint and use `@WebHealthCheck` to configure it), then starts service B, performs discovery, finally it runs your test.
 
-### This stuff is not enough. I need to more config for my container.
+### This stuff is not enough. I need to provide specific config for my container.
 Right. There is no `@SilverBullet` annotation, but there is a `@ContainerBuilder` one that allows you to send commands straight to docker-java.
 ```java
 import com.github.qzagarese.dockerunit.annotation.*;
@@ -143,7 +143,7 @@ Now your container uses the Google dns.
 
 ### I don't want to copy and paste @ContainerBuilder methods in all my descriptors. This should be a component.
 And indeed you can make it more generic.
-All you need is create an annotation and an interpreter.
+All you need to do is creating an annotation and an interpreter.
 
 Here is the annotation:
 ```java

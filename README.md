@@ -110,4 +110,5 @@ This is Dockerunit in a nutshell.
 3. It provides you a ServiceContext instance that you can use to select the services and endpoints to hit.
 4. It cleans up the containers after the the test execution (also when the test fails unexpectedly).
   
-More examples are coming along with a complete Getting Started guide.  
+What next? You can look at some examples [here](./examples/).
+  
