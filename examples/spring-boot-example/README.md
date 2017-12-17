@@ -23,15 +23,15 @@ To find out the ip of the Docker bridge interface, type the following:
 
 If you are on Linux and the ip was `172.17.42.1` you can run the tests as follows:
 
-`./mvn test -P container-tests`
+`./mvnw test -P container-tests`
 
 If you are on Linux but you have a different ip (for example `172.17.0.1`), run the following:
 
-`./mvn test -P container-tests -Ddocker.bridge.ip=172.17.0.1` 
+`./mvnw test -P container-tests -Ddocker.bridge.ip=172.17.0.1` 
 
 If you are on Mac, run the following:
 
-`./mvn test -P container-tests -Ddocker.host=localhost -Ddocker.bridge.ip=172.17.0.1` 
+`./mvnw test -P container-tests -Ddocker.host=localhost -Ddocker.bridge.ip=172.17.0.1` 
 
 Thank you for trying this :-)
 
