@@ -3,6 +3,7 @@ package com.github.qzagarese.microunit.examples.springboot;
 import static com.github.qzagarese.microunit.examples.springboot.Constants.*;
 
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 
 import com.github.qzagarese.dockerunit.DockerUnitRunner;
@@ -17,6 +18,7 @@ import com.jayway.restassured.RestAssured;
 import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(DockerUnitRunner.class)
+@Category(ContainerTest.class)
 public class SpringBootTest {
 
 	@Test
