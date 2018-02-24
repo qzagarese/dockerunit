@@ -11,8 +11,8 @@ public class ConsulDiscoveryConfig {
 	static final String DOCKER_HOST_PROPERTY = "docker.host";
 	static final String SERVICE_DISCOVERY_TIMEOUT = "service.discovery.timeout";
 	static final String SERVICE_DISCOVERY_TIMEOUT_DEFAULT = "30";
-	static final String DNS_POLLING_PERIOD = "dns.polling.period";
-	static final String DNS_POLLING_PERIOD_DEFAULT = "1";
+	static final String CONSUL_POLLING_PERIOD = "consul.polling.period";
+	static final String CONSUL_POLLING_PERIOD_DEFAULT = "1";
 	
 	
 }
