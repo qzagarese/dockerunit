@@ -38,6 +38,22 @@ public class SpringBootTest {
 	}
 	
 	@Test
+	@Use(service=BaseDescriptor.class, replicas= 2)
+	public void healthCheckShouldReturn200FromEachReplica(ServiceContext context) {
+		Service s = context.getService(SERVICE_NAME);
+		s.getInstances().forEach(si -> {
+		RestAssured
+			.given()
+				.baseUri("http://" + si.getIp() + ":" + si.getPort())
+			.when()
+				.get("/health-check")
+			.then()
+				.assertThat()
+				.statusCode(200);
+		});
+	}
+	
+	@Test
 	@Use(service=BaseDescriptor.class)
 	public void greetingShouldReturnImageConfigValue(ServiceContext context) {
 		Service s = context.getService(SERVICE_NAME);
