@@ -62,7 +62,7 @@
 					<includes>
 						<include>**/*.class</include>
 					</includes>
-					<excludedGroups>com.github.qzagarese.microunit.examples.springboot.ContainerTest</excludedGroups>
+					<excludedGroups>com.github.qzagarese.dockerunit.examples.springboot.ContainerTest</excludedGroups>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -100,7 +100,7 @@
 							<includes>
 								<include>**/*.class</include>
 							</includes>
-							<groups>com.github.qzagarese.microunit.examples.springboot.ContainerTest</groups>
+							<groups>com.github.qzagarese.dockerunit.examples.springboot.ContainerTest</groups>
 						</configuration>
 					</plugin>
 				</plugins>

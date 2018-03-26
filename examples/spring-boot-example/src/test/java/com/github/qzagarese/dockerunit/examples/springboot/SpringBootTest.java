@@ -1,6 +1,4 @@
-package com.github.qzagarese.microunit.examples.springboot;
-
-import static com.github.qzagarese.microunit.examples.springboot.Constants.*;
+package com.github.qzagarese.dockerunit.examples.springboot;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -11,10 +9,12 @@ import com.github.qzagarese.dockerunit.Service;
 import com.github.qzagarese.dockerunit.ServiceContext;
 import com.github.qzagarese.dockerunit.ServiceInstance;
 import com.github.qzagarese.dockerunit.annotation.Use;
-import com.github.qzagarese.microunit.examples.springboot.descriptors.BaseDescriptor;
-import com.github.qzagarese.microunit.examples.springboot.descriptors.TestConfigVolumeDescriptor;
-import com.github.qzagarese.microunit.examples.springboot.descriptors.TestEnvDescriptor;
+import com.github.qzagarese.dockerunit.examples.springboot.descriptors.BaseDescriptor;
+import com.github.qzagarese.dockerunit.examples.springboot.descriptors.TestConfigVolumeDescriptor;
+import com.github.qzagarese.dockerunit.examples.springboot.descriptors.TestEnvDescriptor;
 import com.jayway.restassured.RestAssured;
+
+import static com.github.qzagarese.dockerunit.examples.springboot.Constants.*;
 import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(DockerUnitRunner.class)
