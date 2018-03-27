@@ -70,10 +70,10 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 		try {
 			records = resolver.resolveService(s.getName(), s.getInstances().size(), 
 					discoveryTimeout, consulPollingPeriod);
-		} catch (Throwable t) {
+		} catch (Exception e) {
 			return s.withInstances(s.getInstances().stream()
 					.map(i -> i.withStatus(Status.ABORTED)
-							.withStatusDetails(t.getMessage()))
+							.withStatusDetails(e.getMessage()))
 					.collect(Collectors.toSet()));
 		}
 		
