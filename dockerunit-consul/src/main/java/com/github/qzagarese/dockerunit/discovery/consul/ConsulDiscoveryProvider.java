@@ -94,10 +94,10 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 			int expectedRecords = global != null? global.getInstances().size() : 0;
 			resolver.verifyCleanup(current.getName() + CONSUL_DNS_SUFFIX, expectedRecords, discoveryTimeout, consulPollingPeriod);
 			return current;
-		} catch (Throwable t) {
+		} catch (Exception e) {
 			return current.withInstances(current.getInstances().stream()
 				.map(si -> si.withStatus(Status.TERMINATION_FAILED)
-						.withStatusDetails(t.getMessage()))
+						.withStatusDetails(e.getMessage()))
 				.collect(Collectors.toSet()));
 		}
 	}
