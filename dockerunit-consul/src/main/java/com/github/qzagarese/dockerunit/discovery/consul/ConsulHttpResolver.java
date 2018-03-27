@@ -12,7 +12,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -20,7 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.qzagarese.dockerunit.discovery.consul.ServiceRecord.Check;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.json.Json;
 
 public class ConsulHttpResolver {
 
@@ -64,8 +62,8 @@ public class ConsulHttpResolver {
 			List<ServiceRecord> records = null;
 				try {
 					records = getHealthyRecords(serviceName);
-				} catch (Throwable t) {
-					result.completeExceptionally(t);
+				} catch (Exception e) {
+					result.completeExceptionally(e);
 				}
 				int counterValue = counter.incrementAndGet();
 				if(records !=  null && records.size() == expectedRecords) {
