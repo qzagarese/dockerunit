@@ -1,8 +1,8 @@
 package com.github.qzagarese.dockerunit.discovery.consul;
 
-import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDescriptor.CONSUL_DNS_PORT;
-import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.DNS_POLLING_PERIOD;
-import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.DNS_POLLING_PERIOD_DEFAULT;
+import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDescriptor.CONSUL_PORT;
+import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.CONSUL_POLLING_PERIOD;
+import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.CONSUL_POLLING_PERIOD_DEFAULT;
 import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.DOCKER_BRIDGE_IP_DEFAULT;
 import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.DOCKER_BRIDGE_IP_PROPERTY;
 import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.DOCKER_HOST_PROPERTY;
@@ -25,24 +25,22 @@ import com.github.qzagarese.dockerunit.discovery.DiscoveryProvider;
 import com.github.qzagarese.dockerunit.internal.docker.DefaultDockerClientProvider;
 import com.github.qzagarese.dockerunit.internal.service.DefaultServiceContext;
 
-import io.vertx.core.dns.SrvRecord;
-
 public class ConsulDiscoveryProvider implements DiscoveryProvider {
 
 	private static final String DOCKER_HOST = System.getProperty(DOCKER_HOST_PROPERTY, 
 			System.getProperty(DOCKER_BRIDGE_IP_PROPERTY, DOCKER_BRIDGE_IP_DEFAULT));
-	private final DnsResolver resolver;
+	private final ConsulHttpResolver resolver;
 	private final DockerClient dockerClient;
 	private final int discoveryTimeout;
-	private final int dnsPollingFrequency;
+	private final int consulPollingPeriod;
 	
 	static final String CONSUL_DNS_SUFFIX = ".service.consul";
 	
 	public ConsulDiscoveryProvider() {
-		resolver = new DnsResolver(DOCKER_HOST, CONSUL_DNS_PORT);
+		resolver = new ConsulHttpResolver(DOCKER_HOST, CONSUL_PORT);
 		discoveryTimeout = Integer.parseInt(System.getProperty(SERVICE_DISCOVERY_TIMEOUT, 
 				SERVICE_DISCOVERY_TIMEOUT_DEFAULT));
-		dnsPollingFrequency = Integer.parseInt(System.getProperty(DNS_POLLING_PERIOD, DNS_POLLING_PERIOD_DEFAULT));
+		consulPollingPeriod = Integer.parseInt(System.getProperty(CONSUL_POLLING_PERIOD, CONSUL_POLLING_PERIOD_DEFAULT));
 		dockerClient = new DefaultDockerClientProvider().getClient();
 	}
 	
@@ -68,14 +66,14 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 	}
 
 	private Service doDiscovery(Service s) {
-		List<SrvRecord> records;
+		List<ServiceRecord> records;
 		try {
-			records = resolver.resolveSRV(s.getName() + CONSUL_DNS_SUFFIX, s.getInstances().size(), 
-					discoveryTimeout, dnsPollingFrequency);
-		} catch (Throwable t) {
+			records = resolver.resolveService(s.getName(), s.getInstances().size(), 
+					discoveryTimeout, consulPollingPeriod);
+		} catch (Exception e) {
 			return s.withInstances(s.getInstances().stream()
 					.map(i -> i.withStatus(Status.ABORTED)
-							.withStatusDetails(t.getMessage()))
+							.withStatusDetails(e.getMessage()))
 					.collect(Collectors.toSet()));
 		}
 		
@@ -94,31 +92,31 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 	private Service doCleanup(Service current, Service global) {
 		try {
 			int expectedRecords = global != null? global.getInstances().size() : 0;
-			resolver.verifyCleanup(current.getName() + CONSUL_DNS_SUFFIX, expectedRecords, discoveryTimeout, dnsPollingFrequency);
+			resolver.verifyCleanup(current.getName() + CONSUL_DNS_SUFFIX, expectedRecords, discoveryTimeout, consulPollingPeriod);
 			return current;
-		} catch (Throwable t) {
+		} catch (Exception e) {
 			return current.withInstances(current.getInstances().stream()
 				.map(si -> si.withStatus(Status.TERMINATION_FAILED)
-						.withStatusDetails(t.getMessage()))
+						.withStatusDetails(e.getMessage()))
 				.collect(Collectors.toSet()));
 		}
 	}
 
-	private int findPort(InspectContainerResponse response, List<SrvRecord> records) {
-		SrvRecord record = records.stream()
+	private int findPort(InspectContainerResponse response, List<ServiceRecord> records) {
+		ServiceRecord record = records.stream()
 			.filter(r -> this.matchPort(r, response))
 			.findFirst()
 			.orElseThrow(() ->  
 				new RuntimeException("Cannot find exposed port/ip for container " + response.getName()));
-		return record.port();
+		return record.getPort();
 	}
 
-	private boolean matchPort(SrvRecord record, InspectContainerResponse r) {
+	private boolean matchPort(ServiceRecord record, InspectContainerResponse r) {
 		Optional<Binding[]> opt = r.getNetworkSettings().getPorts().getBindings()
 			.values().stream()
 			.filter(b -> b.length > 0 
 					&& isInt(b[0].getHostPortSpec()) 
-					&& record.port() == Integer.parseInt(b[0].getHostPortSpec()))
+					&& record.getPort() == Integer.parseInt(b[0].getHostPortSpec()))
 			.findFirst();	
 		return opt.isPresent();
 	}

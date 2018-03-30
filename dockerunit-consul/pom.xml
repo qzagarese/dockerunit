@@ -3,7 +3,7 @@
 <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.qzagarese</groupId>
   <artifactId>dockerunit-consul</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.0-M2</version>
   <name>dockerunit-consul</name>
   <description>Java Framework for testing of dockerised applications and services. Consul+registrator based service discovery package.</description>
   <url>https://github.com/qzagarese/dockerunit</url>
@@ -15,8 +15,9 @@
   </developers>
 
   <properties>
-    <dockerunit.core.version>1.0-SNAPSHOT</dockerunit.core.version>
-    <vertx.core.version>3.4.2</vertx.core.version>
+    <dockerunit.core.version>1.0.0-M2</dockerunit.core.version>
+    <vertx.core.version>3.5.1</vertx.core.version>
+    <lombok.version>1.16.6</lombok.version>
   </properties>
 
   <licenses>
@@ -42,6 +43,12 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
       <version>${vertx.core.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 

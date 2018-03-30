@@ -1,4 +1,4 @@
-package com.github.qzagarese.microunit.examples.springboot;
+package com.github.qzagarese.dockerunit.examples.springboot;
 
 public class Constants {
 

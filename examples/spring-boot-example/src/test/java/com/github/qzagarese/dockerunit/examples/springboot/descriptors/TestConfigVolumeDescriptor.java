@@ -1,11 +1,11 @@
-package com.github.qzagarese.microunit.examples.springboot.descriptors;
+package com.github.qzagarese.dockerunit.examples.springboot.descriptors;
 
 import com.github.qzagarese.dockerunit.annotation.Image;
 import com.github.qzagarese.dockerunit.annotation.Named;
 import com.github.qzagarese.dockerunit.annotation.PortBinding;
 import com.github.qzagarese.dockerunit.annotation.Volume;
 import com.github.qzagarese.dockerunit.discovery.consul.annotation.WebHealthCheck;
-import com.github.qzagarese.microunit.examples.springboot.Constants;
+import com.github.qzagarese.dockerunit.examples.springboot.Constants;
 
 @Named(Constants.SERVICE_NAME)
 @Image(Constants.IMAGE_NAME)
