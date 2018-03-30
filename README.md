@@ -18,14 +18,14 @@ You can enable Dockerunit by adding the following dependencies to you POM file.
 <dependency>
   <groupId>com.github.qzagarese</groupId>
   <artifactId>dockerunit-core</artifactId>
-  <version>1.0.0-M1</version>
+  <version>1.0.0-M2</version>
   <scope>test</scope>
 </dependency>
 
 <dependency>
   <groupId>com.github.qzagarese</groupId>
   <artifactId>dockerunit-consul</artifactId>
-  <version>1.0.0-M1</version>
+  <version>1.0.0-M2</version>
   <scope>test</scope>
 </dependency>
 ```
