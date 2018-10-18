@@ -114,7 +114,8 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 	private boolean matchPort(ServiceRecord record, InspectContainerResponse r) {
 		Optional<Binding[]> opt = r.getNetworkSettings().getPorts().getBindings()
 			.values().stream()
-			.filter(b -> b.length > 0 
+			.filter(b -> b != null 
+			        && b.length > 0 
 					&& isInt(b[0].getHostPortSpec()) 
 					&& record.getPort() == Integer.parseInt(b[0].getHostPortSpec()))
 			.findFirst();	
