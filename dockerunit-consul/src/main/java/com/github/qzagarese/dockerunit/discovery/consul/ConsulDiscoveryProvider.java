@@ -9,6 +9,7 @@ import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryCo
 import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.SERVICE_DISCOVERY_TIMEOUT;
 import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.SERVICE_DISCOVERY_TIMEOUT_DEFAULT;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -22,6 +23,8 @@ import com.github.qzagarese.dockerunit.ServiceContext;
 import com.github.qzagarese.dockerunit.ServiceInstance;
 import com.github.qzagarese.dockerunit.ServiceInstance.Status;
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProvider;
+import com.github.qzagarese.dockerunit.discovery.consul.annotation.EnableConsul;
+import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 import com.github.qzagarese.dockerunit.internal.docker.DefaultDockerClientProvider;
 import com.github.qzagarese.dockerunit.internal.service.DefaultServiceContext;
 
@@ -69,7 +72,7 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 		List<ServiceRecord> records;
 		try {
 			records = resolver.resolveService(s.getName(), s.getInstances().size(), 
-					discoveryTimeout, consulPollingPeriod);
+					discoveryTimeout, consulPollingPeriod, extractInitialDelay(s.getDescriptor()));
 		} catch (Exception e) {
 			return s.withInstances(s.getInstances().stream()
 					.map(i -> i.withStatus(Status.ABORTED)
@@ -89,7 +92,16 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 		return s.withInstances(withPorts);
 	}
 
-	private Service doCleanup(Service current, Service global) {
+	private int extractInitialDelay(ServiceDescriptor descriptor) {
+        Annotation consulAnnotation = descriptor.getOptions().stream()
+            .filter(annotation -> annotation.annotationType().equals(EnableConsul.class))
+            .findFirst()
+            .orElse(null);
+            
+        return consulAnnotation != null ? ((EnableConsul) consulAnnotation).initialDelay() : 0;
+    }
+
+    private Service doCleanup(Service current, Service global) {
 		try {
 			int expectedRecords = global != null? global.getInstances().size() : 0;
 			resolver.verifyCleanup(current.getName() + CONSUL_DNS_SUFFIX, expectedRecords, discoveryTimeout, consulPollingPeriod);

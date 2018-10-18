@@ -8,6 +8,7 @@ import com.github.qzagarese.dockerunit.ServiceInstance.Status;
 import com.github.qzagarese.dockerunit.annotation.Image;
 import com.github.qzagarese.dockerunit.annotation.Named;
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProvider;
+import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 
 import lombok.AllArgsConstructor;
 import lombok.experimental.Wither;
@@ -34,6 +35,7 @@ public class Service {
 
     private final String name;
     private final Set<ServiceInstance> instances;
+    private final ServiceDescriptor descriptor;
     
     /**
      *  
@@ -60,6 +62,16 @@ public class Service {
      */
     public Set<ServiceInstance> getInstances() {
     	return this.instances;
+    }
+    
+    
+    /**
+     * 
+     * @return the descriptor of this service that provides the runtime representation of the annotation based
+     * configuration that has been used.
+     */
+    public ServiceDescriptor getDescriptor() {
+        return this.descriptor;
     }
     
     public List<String> getWarnings() {

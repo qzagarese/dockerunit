@@ -32,23 +32,23 @@ import com.github.qzagarese.dockerunit.annotation.ExtensionMarker;
 import com.github.qzagarese.dockerunit.annotation.Image.PullStrategy;
 import com.github.qzagarese.dockerunit.exception.ContainerException;
 import com.github.qzagarese.dockerunit.internal.ServiceBuilder;
-import com.github.qzagarese.dockerunit.internal.TestDescriptor;
+import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 
 public class DefaultServiceBuilder implements ServiceBuilder {
 
 	private final Logger logger = Logger.getLogger(this.getClass().getSimpleName());
 	
     @Override
-    public Service build(TestDescriptor descriptor, DockerClient client) {
+    public Service build(ServiceDescriptor descriptor, DockerClient client) {
         Set<ServiceInstance> instances = new HashSet<>();
         for (int i = 0; i < descriptor.getReplicas(); i++) {
             instances.add(createInstance(descriptor, client, i));
         }
         return new Service(descriptor.getNamed()
-            .value(), instances);
+            .value(), instances, descriptor);
     }
 
-    private ServiceInstance createInstance(TestDescriptor descriptor, DockerClient client, int i) {
+    private ServiceInstance createInstance(ServiceDescriptor descriptor, DockerClient client, int i) {
         CreateContainerCmd cmd = client.createContainerCmd(descriptor.getImage().value());
         cmd = computeContainerName(descriptor, i, cmd);
         cmd = executeOptionBuilders(descriptor, cmd);
@@ -83,7 +83,7 @@ public class DefaultServiceBuilder implements ServiceBuilder {
                 .build();
     }
 
-	private CreateContainerCmd computeContainerName(TestDescriptor dependency, int i, CreateContainerCmd cmd) {
+	private CreateContainerCmd computeContainerName(ServiceDescriptor dependency, int i, CreateContainerCmd cmd) {
 		if (!dependency.getContainerName()
             .isEmpty()) {
             String name = dependency.getReplicas() > 1 
@@ -194,7 +194,7 @@ public class DefaultServiceBuilder implements ServiceBuilder {
         return cmd;
     }
 
-    private CreateContainerCmd executeOptionBuilders(TestDescriptor descriptor, CreateContainerCmd cmd) {
+    private CreateContainerCmd executeOptionBuilders(ServiceDescriptor descriptor, CreateContainerCmd cmd) {
         for (Annotation a : descriptor.getOptions()) {
             Class<? extends ExtensionInterpreter<?>> builderType = a.annotationType().getAnnotation(ExtensionMarker.class)
                 .value();
@@ -211,7 +211,7 @@ public class DefaultServiceBuilder implements ServiceBuilder {
                     e);
             }
             try {
-            	buildMethod = builderType.getDeclaredMethod("build", new Class<?>[] {TestDescriptor.class, CreateContainerCmd.class, a.annotationType() });
+            	buildMethod = builderType.getDeclaredMethod("build", new Class<?>[] {ServiceDescriptor.class, CreateContainerCmd.class, a.annotationType() });
                 cmd = (CreateContainerCmd) buildMethod.invoke(builder, descriptor, cmd, a);
             } catch (Exception e) {
                 throw new RuntimeException(

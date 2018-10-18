@@ -3,7 +3,7 @@ package com.github.qzagarese.dockerunit.annotation;
 import java.lang.annotation.Annotation;
 
 import com.github.dockerjava.api.command.CreateContainerCmd;
-import com.github.qzagarese.dockerunit.internal.TestDescriptor;
+import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 
 /**
  * 
@@ -42,6 +42,6 @@ public interface ExtensionInterpreter<T extends Annotation> {
 	 * @param t the annotation that is interpreted by this class
 	 * @return the updated {@linkplain CreateContainerCmd} instance
 	 */
-    CreateContainerCmd build(TestDescriptor td, CreateContainerCmd cmd, T t);
+    CreateContainerCmd build(ServiceDescriptor td, CreateContainerCmd cmd, T t);
     
 }
