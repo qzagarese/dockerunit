@@ -46,7 +46,7 @@ public class DockerUnitRunner extends BlockJUnit4ClassRunner {
 	private final ServiceContextBuilder contextBuilder = ServiceContextBuilderFactory.create();
 	private final DiscoveryProvider discoveryProvider;
 	
-	private final Logger logger = Logger.getLogger(this.getClass().getSimpleName());
+	private static final Logger logger = Logger.getLogger(DockerUnitRunner.class.getSimpleName());
 	
     public DockerUnitRunner(Class<?> klass) throws InitializationError {
         super(klass);

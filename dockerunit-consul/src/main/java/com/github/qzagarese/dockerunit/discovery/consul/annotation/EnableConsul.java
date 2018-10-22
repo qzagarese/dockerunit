@@ -53,7 +53,7 @@ public @interface EnableConsul {
 	 * 
 	 * @return
 	 */
-    CheckStatus checkInitialStatus() default CheckStatus.PASSING;
+	CheckStatus checkInitialStatus() default CheckStatus.PASSING;
 
     
     public enum CheckStatus {

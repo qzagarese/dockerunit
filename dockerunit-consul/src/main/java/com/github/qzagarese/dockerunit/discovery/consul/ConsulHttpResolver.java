@@ -46,6 +46,7 @@ public class ConsulHttpResolver {
 	public List<ServiceRecord> resolveService(String serviceName, int expectedRecords, int timeoutInSeconds,
 			int frequencyInSeconds, int initialDelayInSeconds) {
 	    try {
+	        //TODO Rewrite this by using a proper library
             Thread.sleep(initialDelayInSeconds * 1000);
         } catch (InterruptedException e) {
             throw new RuntimeException("Failure occurred during the discovery of service " + serviceName);

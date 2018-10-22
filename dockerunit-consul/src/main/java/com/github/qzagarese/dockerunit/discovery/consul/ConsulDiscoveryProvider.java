@@ -9,7 +9,6 @@ import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryCo
 import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.SERVICE_DISCOVERY_TIMEOUT;
 import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.SERVICE_DISCOVERY_TIMEOUT_DEFAULT;
 
-import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -93,12 +92,12 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 	}
 
 	private int extractInitialDelay(ServiceDescriptor descriptor) {
-        Annotation consulAnnotation = descriptor.getOptions().stream()
-            .filter(annotation -> annotation.annotationType().equals(EnableConsul.class))
-            .findFirst()
-            .orElse(null);
-            
-        return consulAnnotation != null ? ((EnableConsul) consulAnnotation).initialDelay() : 0;
+	    return descriptor.getOptions().stream()
+	        .filter(EnableConsul.class::isInstance)
+	        .findFirst()
+	        .map(EnableConsul.class::cast)
+	        .map(EnableConsul::initialDelay)
+	        .orElse(0);
     }
 
     private Service doCleanup(Service current, Service global) {
@@ -124,23 +123,20 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 	}
 
 	private boolean matchPort(ServiceRecord record, InspectContainerResponse r) {
-		Optional<Binding[]> opt = r.getNetworkSettings().getPorts().getBindings()
-			.values().stream()
-			.filter(b -> b != null 
-			        && b.length > 0 
-					&& isInt(b[0].getHostPortSpec()) 
-					&& record.getPort() == Integer.parseInt(b[0].getHostPortSpec()))
-			.findFirst();	
-		return opt.isPresent();
+		return r.getNetworkSettings().getPorts().getBindings().values()
+                .stream()
+                .map(bindings -> Optional.ofNullable(bindings).orElse(new Binding[]{}))
+                .filter(b -> b.length > 0)
+                .map(b -> parsePort(b[0].getHostPortSpec()))
+                .anyMatch(port -> record.getPort() == port.orElse(-1));
 	}
 
-	private boolean isInt(String hostPortSpec) {
-		try {
-			Integer.parseInt(hostPortSpec);
-			return true;
-		} catch (NumberFormatException nfe) {
-			return false;
-		}
-	}
-
+	private Optional<Integer> parsePort(String s) {
+        try {
+            return Optional.of(Integer.parseInt(s));
+        } catch (NumberFormatException nfe) {
+            return Optional.empty();
+        }
+    }
+	
 }
