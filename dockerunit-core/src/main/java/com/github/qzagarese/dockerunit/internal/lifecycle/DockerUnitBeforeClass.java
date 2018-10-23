@@ -1,21 +1,26 @@
 package com.github.qzagarese.dockerunit.internal.lifecycle;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.junit.runners.model.Statement;
 
 import com.github.qzagarese.dockerunit.DockerUnitRunner;
 import com.github.qzagarese.dockerunit.ServiceContext;
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProvider;
-import com.github.qzagarese.dockerunit.internal.UsageDescriptor;
 import com.github.qzagarese.dockerunit.internal.ServiceContextBuilder;
+import com.github.qzagarese.dockerunit.internal.UsageDescriptor;
+import com.github.qzagarese.dockerunit.internal.service.DefaultServiceContext;
 
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class DockerUnitBeforeClass extends Statement {
 
+    private static Logger logger = Logger.getLogger(DockerUnitBeforeClass.class.getName());
+    
 	private final DockerUnitRunner runner;
 	private final Statement next;
 	private final DiscoveryProvider discoveryProvider;
@@ -32,25 +37,24 @@ public class DockerUnitBeforeClass extends Statement {
 		}
 		
 		
-		List<ServiceContext> serviceContexts = new ArrayList<>();
-        
-        descriptor.getDependencies().forEach(svc -> {
-            // Build containers
-            ServiceContext singleSvcContext = contextBuilder.buildServiceContext(svc);
-            if(!singleSvcContext.allHealthy()) {
-                throw new RuntimeException(singleSvcContext.getFormattedErrors());
-            }
-           
-            // Perform discovery
-            singleSvcContext = discoveryProvider.populateRegistry(singleSvcContext);
-            if(!singleSvcContext.allHealthy()) {
-                throw new RuntimeException(singleSvcContext.getFormattedErrors());
-            }
-            serviceContexts.add(singleSvcContext);
-        });
+		// Create containers and perform discovery one service at the time
+        List<ServiceContext> serviceContexts = descriptor.getDependencies().stream()
+            .map(contextBuilder::buildServiceContext)
+            .map(ctx -> {
+                if (!ctx.allHealthy()) {
+                    throw new RuntimeException(ctx.getFormattedErrors());
+                }
+                logger.info("Performing discovery for service " + ctx.getServices().stream().findFirst().get().getName());
+                return discoveryProvider.populateRegistry(ctx);
+            })
+            .collect(Collectors.toList());  
 		
         ServiceContext context = mergeContexts(serviceContexts);
 
+        if(context == null) {
+            context = new DefaultServiceContext(new HashSet<>());
+        }
+        
 		runner.setClassContext(context);
 		if(!context.allHealthy()) {
 			throw new RuntimeException(context.getFormattedErrors());
