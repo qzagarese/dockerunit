@@ -48,6 +48,17 @@ public class Service {
     }
 
     /**
+     * Checks whether all the {@link ServiceInstance}s in this service are in the specified {@link Status}.
+     * 
+     * @param status the {@link Status} to check
+     * @return
+     */
+    public boolean checkStatus(Status status) {
+        return instances.stream()
+                .allMatch(si -> si.getStatus().equals(status));
+    }
+
+    /**
      * 
      * @return the service name as declared in {@linkplain Named}
      */

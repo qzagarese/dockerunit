@@ -12,6 +12,7 @@ import org.junit.runners.model.Statement;
 import com.github.qzagarese.dockerunit.DockerUnitRunner;
 import com.github.qzagarese.dockerunit.Service;
 import com.github.qzagarese.dockerunit.ServiceContext;
+import com.github.qzagarese.dockerunit.ServiceInstance.Status;
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProvider;
 import com.github.qzagarese.dockerunit.internal.ServiceContextBuilder;
 import com.github.qzagarese.dockerunit.internal.UsageDescriptor;
@@ -38,7 +39,7 @@ public class DockerUnitBefore extends Statement {
         List<ServiceContext> serviceContexts = descriptor.getDependencies().stream()
             .map(contextBuilder::buildServiceContext)
             .map(ctx -> {
-                if (!ctx.allHealthy()) {
+                if (!ctx.checkStatus(Status.STARTED)) {
                     throw new RuntimeException(ctx.getFormattedErrors());
                 }
                 logger.info("Performing discovery for service " + ctx.getServices().stream().findFirst().get().getName());
@@ -53,7 +54,7 @@ public class DockerUnitBefore extends Statement {
 	    methodLevelContext = methodLevelContext.merge(runner.getClassContext());
     
 	    runner.setContext(method, methodLevelContext);
-        if(!methodLevelContext.allHealthy()) {
+        if(!methodLevelContext.checkStatus(Status.DISCOVERED)) {
         	throw new RuntimeException(methodLevelContext.getFormattedErrors());
         }
         next.evaluate();

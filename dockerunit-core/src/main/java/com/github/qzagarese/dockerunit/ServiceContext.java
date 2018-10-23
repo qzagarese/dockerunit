@@ -2,6 +2,7 @@ package com.github.qzagarese.dockerunit;
 
 import java.util.Set;
 
+import com.github.qzagarese.dockerunit.ServiceInstance.Status;
 import com.github.qzagarese.dockerunit.annotation.Named;
 
 /**
@@ -32,6 +33,14 @@ public interface ServiceContext {
 	ServiceContext subtract(ServiceContext context);
 	
 	boolean allHealthy();
+	
+	/**
+	 * Checks whether all the {@link ServiceInstance}s of all {@link Service}s in this context are in the specified {@link Status}
+	 * 
+	 * @param status the {@link Status} to check
+	 * @return
+	 */
+	boolean checkStatus(Status status);
 	
 	String getFormattedErrors();
     

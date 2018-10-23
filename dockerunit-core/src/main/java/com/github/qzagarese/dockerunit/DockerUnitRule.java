@@ -14,6 +14,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
+import com.github.qzagarese.dockerunit.ServiceInstance.Status;
 import com.github.qzagarese.dockerunit.annotation.Use;
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProvider;
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProviderFactory;
@@ -112,7 +113,7 @@ public class DockerUnitRule implements TestRule {
       
         // Build discovery context
         this.discoveryContext = contextBuilder.buildContext(discoveryProviderDescriptor);
-        if(!discoveryContext.allHealthy()) {
+        if(!discoveryContext.checkStatus(Status.STARTED)) {
             throw new RuntimeException(discoveryContext.getFormattedErrors());
         }
 
@@ -121,7 +122,7 @@ public class DockerUnitRule implements TestRule {
         List<ServiceContext> serviceContexts = descriptor.getDependencies().stream()
             .map(contextBuilder::buildServiceContext)
             .map(ctx -> {
-                if (!ctx.allHealthy()) {
+                if (!ctx.checkStatus(Status.STARTED)) {
                     throw new RuntimeException(ctx.getFormattedErrors());
                 }
                 logger.info("Performing discovery for service " + ctx.getServices().stream().findFirst().get().getName());
@@ -131,7 +132,7 @@ public class DockerUnitRule implements TestRule {
         
         ServiceContext completeContext = mergeContexts(serviceContexts);
         activeContexts.put(this.serviceContextName, completeContext);
-        if(!completeContext.allHealthy()) {
+        if(!completeContext.checkStatus(Status.DISCOVERED)) {
             throw new RuntimeException(completeContext.getFormattedErrors());
         }
         

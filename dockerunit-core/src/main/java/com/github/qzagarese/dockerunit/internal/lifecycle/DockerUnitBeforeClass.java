@@ -9,6 +9,7 @@ import org.junit.runners.model.Statement;
 
 import com.github.qzagarese.dockerunit.DockerUnitRunner;
 import com.github.qzagarese.dockerunit.ServiceContext;
+import com.github.qzagarese.dockerunit.ServiceInstance.Status;
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProvider;
 import com.github.qzagarese.dockerunit.internal.ServiceContextBuilder;
 import com.github.qzagarese.dockerunit.internal.UsageDescriptor;
@@ -32,7 +33,7 @@ public class DockerUnitBeforeClass extends Statement {
 	public void evaluate() throws Throwable {
 		ServiceContext discoveryContext = contextBuilder.buildContext(discoveryProviderDescriptor);
 		runner.setDiscoveryContext(discoveryContext);
-		if(!discoveryContext.allHealthy()) {
+		if(!discoveryContext.checkStatus(Status.STARTED)) {
 			throw new RuntimeException(discoveryContext.getFormattedErrors());
 		}
 		
@@ -56,7 +57,7 @@ public class DockerUnitBeforeClass extends Statement {
         }
         
 		runner.setClassContext(context);
-		if(!context.allHealthy()) {
+		if(!context.checkStatus(Status.DISCOVERED)) {
 			throw new RuntimeException(context.getFormattedErrors());
 		}
         next.evaluate();
