@@ -18,14 +18,14 @@ You can enable Dockerunit by adding the following dependencies to you POM file.
 <dependency>
   <groupId>com.github.qzagarese</groupId>
   <artifactId>dockerunit-core</artifactId>
-  <version>1.0.0-M2</version>
+  <version>1.0.0-M3</version>
   <scope>test</scope>
 </dependency>
 
 <dependency>
   <groupId>com.github.qzagarese</groupId>
   <artifactId>dockerunit-consul</artifactId>
-  <version>1.0.0-M2</version>
+  <version>1.0.0-M3</version>
   <scope>test</scope>
 </dependency>
 ```
@@ -36,8 +36,8 @@ Building tests with Dockerunit consists of two main steps:
 2. Using your service from your test.
 
 ### 1. Defining your service descriptor
-A service descriptor is a class that instructs Dockerunit about how to create Docker containers, given a Docker image you have previously created.
-Here is a simple descriptor for a Spring service listening on port 8080.
+A service descriptor is a class that instructs Dockerunit about how to create Docker containers, given a Docker image that you have previously created.
+Here is a simple descriptor for a Spring service that is listening on port 8080.
 
 ```java
 import com.github.qzagarese.dockerunit.annotation.Image;
@@ -57,7 +57,7 @@ import com.github.qzagarese.dockerunit.discovery.consul.annotation.WebHealthChec
 
 /* Tells Consul how to monitor the state of your service. 
 You should always provide a health check endpoint. 
-If not, Dockerunit cannot guarantee your service started successfully, 
+If not, Dockerunit cannot guarantee that your service has started successfully, 
 before your test invokes its endpoints. */  
 @WebHealthCheck(exposedPort=8080, endpoint="/health-check")
 public class MyServiceDescriptor {
@@ -65,10 +65,30 @@ public class MyServiceDescriptor {
 ```
 
 ### 2. Using your service from your test
+
+There are two ways to enable Dockerunit in your tests:
+
+1. As a runner using the `@RunWith` annotation as follows: `@RunWith(DockerUnitRunner.class)`.
+2. As a rule using the `@Rule` or the `@ClassRule` annotation.  
+
+Using the runner allows you to combine startup of containers at a class and a test execution level.
+This means that you can start one or more services only once, if they are used by all the tests in your test class, 
+and at the same time you can spin up the remaining ones when the test that needs them is going to execute.
+
+On the other hand, you can only use one runner at the time, so you cannot use Dockerunit in conjunction with other testing frameworks if you are using this approach.
+
+Using a rule allows you to perform service startup/discovery either once per test class execution (`@ClassRule`) or before each test (`@Rule`). 
+
+Moreover, you can use rules with JUnit `@SuiteClasses`, which allows you to perform service startup/discovery once and then execute several test classes rapidly.
+
+Finally, using a rule allows you to combine Dockerunit with other runner-based testing frameworks. 
+
+
 It's now time to write an actual test.
-This example uses RestAssured, but you can choose any library to hit your endpoints.
+The following examples use RestAssured, but you can choose any library to hit your endpoints.
 We are testing that our service starts correctly and the health-check responds with a 200 status code.
 
+Here is an example that uses `DockerUnitRunner`:
 ```java
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -86,6 +106,52 @@ public class MyServiceTest {
 	@Test
 	@Use(service=MyServiceDescriptor.class) // Selects the previously defined descriptor
 	public void healthCheckShouldReturn200(ServiceContext context) {
+		// Gets the service based on value in the @Named annotation
+		Service s = context.getService("my-spring-service"); 
+		// Selects an available instance (you could declare more than one)
+		ServiceInstance si = s.getInstances().stream().findAny().get(); 
+		
+		RestAssured
+			.given()
+				/* Uses the ip and port of the instance. 
+				The port could be dynamic if @PublishPorts is used */
+				.baseUri("http://" + si.getIp() + ":" + si.getPort()) 
+			.when()
+				.get("/health-check") // Hits the health-check endpoint 
+			.then()
+				.assertThat()
+				.statusCode(200);
+	}
+```
+
+Here is an example that uses `DockerUnitRule`:
+```java
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.Rule;
+
+import com.github.qzagarese.dockerunit.DockerUnitRule;
+import com.github.qzagarese.dockerunit.Service;
+import com.github.qzagarese.dockerunit.ServiceContext;
+import com.github.qzagarese.dockerunit.ServiceInstance;
+import com.github.qzagarese.dockerunit.annotation.Use;
+import com.jayway.restassured.RestAssured;
+
+@Use(service=MyServiceDescriptor.class) // Selects the previously defined descriptor
+public class MyServiceTest {
+
+	@Rule
+	DockerUnitRule rule = new DockerUnitRule();
+
+	private ServiceContext context;
+    
+	@Before
+	public void setup() {
+		context = DockerUnitRule.getDefaultServiceContext();
+	}
+
+	@Test
+	public void healthCheckShouldReturn200() {
 		// Gets the service based on value in the @Named annotation
 		Service s = context.getService("my-spring-service"); 
 		// Selects an available instance (you could declare more than one)

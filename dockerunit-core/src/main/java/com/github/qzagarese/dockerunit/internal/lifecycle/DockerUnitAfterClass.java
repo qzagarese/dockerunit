@@ -24,11 +24,9 @@ public class DockerUnitAfterClass extends Statement {
 	public void evaluate() throws Throwable {
 		try {
 			statement.evaluate();
-		} catch (Throwable t) {
-			throw t;
 		} finally {
 			ServiceContext context = runner.getClassContext();
-			if(context != null) {
+			if (context != null) {
 				ServiceContext cleared = contextBuilder.clearContext(context);
 				discoveryProvider.clearRegistry(cleared, new DefaultServiceContext(new HashSet<>()));
 			}

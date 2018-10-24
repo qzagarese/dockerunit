@@ -37,6 +37,8 @@ public class DockerUnitRule implements TestRule {
     private final DiscoveryProvider discoveryProvider;
     private final String serviceContextName;
     private ServiceContext discoveryContext;
+    
+    private static final String GLOBAL_CONTEXT_NAME = "dockerunit_global_context";    
 
     /**
      * Returns the {@link ServiceContext} that has been associated to the instance of {@link DockerUnitRule} that
@@ -54,19 +56,25 @@ public class DockerUnitRule implements TestRule {
     }
     
     /**
-     * Return a random {@link ServiceContext}, however you will most often have only one, 
-     * as contexts are mapped one-to-one to {@link DockerUnitRule} instances. 
+     * Returns the default {@link ServiceContext} or a random one if all the current instances of {@link DockerUnitRule}
+     * have been initialised with a specific service context name.
      * 
-     * @return a random {@link ServiceContext}
+     * @return the default{@link ServiceContext}
      */
     public static ServiceContext getDefaultServiceContext() {
-        return activeContexts.values().stream().findAny()
-                .orElseThrow(() -> new ConfigException("No active context detected. "
-                        + "Please make sure that you have declared at least one @"
-                        + Use.class.getSimpleName()
-                        + " annotation on tha class that declares your "
-                        + DockerUnitRule.class.getSimpleName()
-                        + " instance."));
+        return Optional.ofNullable(activeContexts.get(GLOBAL_CONTEXT_NAME))
+                .orElse(
+                        activeContexts.values().stream().findAny()
+                                .orElseThrow(() -> new ConfigException("No active context detected. "
+                                    + "Please make sure that you have declared at least one @"
+                                    + Use.class.getSimpleName()
+                                    + " annotation on tha class that declares your "
+                                    + DockerUnitRule.class.getSimpleName()
+                                    + " instance.")));
+    }
+    
+    public DockerUnitRule() {
+        this(GLOBAL_CONTEXT_NAME);
     }
     
     public DockerUnitRule(String serviceContextName) {
