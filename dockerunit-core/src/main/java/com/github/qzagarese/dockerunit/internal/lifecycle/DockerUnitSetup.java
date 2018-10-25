@@ -44,7 +44,7 @@ public class DockerUnitSetup {
             
                 logger.info("Performing discovery for service " + getServiceName(ctx));
                 ServiceContext postDiscoveryCtx = discoveryProvider.populateRegistry(ctx);
-                if (!ctx.checkStatus(Status.DISCOVERED)) {
+                if (!postDiscoveryCtx.checkStatus(Status.DISCOVERED)) {
                 	failureOccured.set(true);
                 }
                 return postDiscoveryCtx;
