@@ -8,7 +8,7 @@ import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 public class PublishPortsExtensionInterpreter implements ExtensionInterpreter<PublishPorts> {
 
     @Override
-    public CreateContainerCmd build(ServiceDescriptor td, CreateContainerCmd cmd, PublishPorts t) {
+    public CreateContainerCmd build(ServiceDescriptor sd, CreateContainerCmd cmd, PublishPorts pp) {
         return cmd.withPublishAllPorts(true);
     }
 

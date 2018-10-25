@@ -1,9 +1,6 @@
 package com.github.qzagarese.dockerunit.internal.lifecycle;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.junit.runners.model.Statement;
 
@@ -20,8 +17,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class DockerUnitBeforeClass extends Statement {
 
-    private static Logger logger = Logger.getLogger(DockerUnitBeforeClass.class.getName());
-    
 	private final DockerUnitRunner runner;
 	private final Statement next;
 	private final DiscoveryProvider discoveryProvider;
@@ -33,46 +28,21 @@ public class DockerUnitBeforeClass extends Statement {
 	public void evaluate() throws Throwable {
 		ServiceContext discoveryContext = contextBuilder.buildContext(discoveryProviderDescriptor);
 		runner.setDiscoveryContext(discoveryContext);
-		if(!discoveryContext.checkStatus(Status.STARTED)) {
+		if (!discoveryContext.checkStatus(Status.STARTED)) {
 			throw new RuntimeException(discoveryContext.getFormattedErrors());
 		}
 		
-		
-		// Create containers and perform discovery one service at the time
-        List<ServiceContext> serviceContexts = descriptor.getDependencies().stream()
-            .map(contextBuilder::buildServiceContext)
-            .map(ctx -> {
-                if (!ctx.allHealthy()) {
-                    throw new RuntimeException(ctx.getFormattedErrors());
-                }
-                logger.info("Performing discovery for service " + ctx.getServices().stream().findFirst().get().getName());
-                return discoveryProvider.populateRegistry(ctx);
-            })
-            .collect(Collectors.toList());  
-		
-        ServiceContext context = mergeContexts(serviceContexts);
+		ServiceContext context = new DockerUnitSetup(contextBuilder, discoveryProvider).setup(descriptor);
 
-        if(context == null) {
+        if (context == null) {
             context = new DefaultServiceContext(new HashSet<>());
         }
         
 		runner.setClassContext(context);
-		if(!context.checkStatus(Status.DISCOVERED)) {
+		if (!context.checkStatus(Status.DISCOVERED)) {
 			throw new RuntimeException(context.getFormattedErrors());
 		}
         next.evaluate();
 	}
-
-	private ServiceContext mergeContexts(List<ServiceContext> serviceContexts) {
-        ServiceContext completeContext = null;
-        if (serviceContexts.size() > 0) {
-            completeContext = serviceContexts.remove(0);
-        }
-        for (ServiceContext serviceContext : serviceContexts) {
-            completeContext = completeContext.merge(serviceContext);
-        }
-        return completeContext;
-    }
-	
 	
 }

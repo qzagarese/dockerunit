@@ -11,9 +11,9 @@ public class PortBindingWrapperExtensionInterpreter implements ExtensionInterpre
     private PortBindingExtensionInterpreter builder = new PortBindingExtensionInterpreter();
     
     @Override
-    public CreateContainerCmd build(ServiceDescriptor td, CreateContainerCmd cmd, PortBindings pbs) {
+    public CreateContainerCmd build(ServiceDescriptor sd, CreateContainerCmd cmd, PortBindings pbs) {
         for (PortBinding pb : pbs.value()) {
-            cmd = builder.build(td, cmd, pb);
+            cmd = builder.build(sd, cmd, pb);
         }
         return cmd;
     }

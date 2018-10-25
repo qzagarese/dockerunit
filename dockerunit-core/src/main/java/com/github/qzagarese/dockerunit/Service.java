@@ -51,7 +51,7 @@ public class Service {
      * Checks whether all the {@link ServiceInstance}s in this service are in the specified {@link Status}.
      * 
      * @param status the {@link Status} to check
-     * @return
+     * @return true if all the {@link ServiceInstance}s in this service are in the specified status, false otherwise.
      */
     public boolean checkStatus(Status status) {
         return instances.stream()

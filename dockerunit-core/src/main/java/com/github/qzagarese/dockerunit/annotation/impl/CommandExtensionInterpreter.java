@@ -8,8 +8,8 @@ import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 public class CommandExtensionInterpreter implements ExtensionInterpreter<Command>{
 
     @Override
-    public CreateContainerCmd build(ServiceDescriptor td, CreateContainerCmd cmd, Command t) {
-        return cmd.withCmd(t.value());
+    public CreateContainerCmd build(ServiceDescriptor sd, CreateContainerCmd cmd, Command c) {
+        return cmd.withCmd(c.value());
     }
 
 }

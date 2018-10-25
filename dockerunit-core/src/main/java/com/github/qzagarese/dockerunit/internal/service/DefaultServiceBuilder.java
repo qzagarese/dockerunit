@@ -36,7 +36,7 @@ import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 
 public class DefaultServiceBuilder implements ServiceBuilder {
 
-	private final Logger logger = Logger.getLogger(this.getClass().getSimpleName());
+	private final static Logger logger = Logger.getLogger(DefaultServiceBuilder.class.getSimpleName());
 	
     @Override
     public Service build(ServiceDescriptor descriptor, DockerClient client) {

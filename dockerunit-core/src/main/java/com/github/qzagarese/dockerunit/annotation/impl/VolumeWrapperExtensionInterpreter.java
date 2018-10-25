@@ -11,9 +11,9 @@ public class VolumeWrapperExtensionInterpreter implements ExtensionInterpreter<V
     private VolumeExtensionInterpreter builder = new VolumeExtensionInterpreter();
     
     @Override
-    public CreateContainerCmd build(ServiceDescriptor td, CreateContainerCmd cmd, Volumes vs) {
+    public CreateContainerCmd build(ServiceDescriptor sd, CreateContainerCmd cmd, Volumes vs) {
         for (Volume v : vs.value()) {
-            cmd = builder.build(td, cmd, v);
+            cmd = builder.build(sd, cmd, v);
         }
         return cmd;
     }

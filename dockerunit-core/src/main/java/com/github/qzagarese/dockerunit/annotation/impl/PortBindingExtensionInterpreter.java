@@ -15,7 +15,7 @@ import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 public class PortBindingExtensionInterpreter implements ExtensionInterpreter<PortBinding> {
 
     @Override
-    public CreateContainerCmd build(ServiceDescriptor td, CreateContainerCmd cmd, PortBinding pb) {
+    public CreateContainerCmd build(ServiceDescriptor sd, CreateContainerCmd cmd, PortBinding pb) {
         List<ExposedPort> ports = new ArrayList<>(Arrays.asList(cmd.getExposedPorts()));
         ExposedPort containerPort = pb.protocol()
             .equals(Protocol.TCP) ? ExposedPort.tcp(pb.exposedPort()) : ExposedPort.udp(pb.exposedPort());

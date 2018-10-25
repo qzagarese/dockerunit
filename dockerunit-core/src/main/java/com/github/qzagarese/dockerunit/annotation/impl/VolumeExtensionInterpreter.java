@@ -14,7 +14,7 @@ import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 public class VolumeExtensionInterpreter implements ExtensionInterpreter<Volume> {
 
     @Override
-    public CreateContainerCmd build(ServiceDescriptor td, CreateContainerCmd cmd, Volume v) {
+    public CreateContainerCmd build(ServiceDescriptor sd, CreateContainerCmd cmd, Volume v) {
     	Bind[] binds = cmd.getBinds();
     	
     	String hostPath = v.useClasspath() 

@@ -12,10 +12,10 @@ import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 public class EnvExtensionInterpreter implements ExtensionInterpreter<Env> {
 
 	@Override
-	public CreateContainerCmd build(ServiceDescriptor td, CreateContainerCmd cmd, Env t) {
+	public CreateContainerCmd build(ServiceDescriptor sd, CreateContainerCmd cmd, Env e) {
 		String[] env = cmd.getEnv();
 		List<String> finalEnv = new ArrayList<>();
-		finalEnv.addAll(Arrays.asList(t.value()));
+		finalEnv.addAll(Arrays.asList(e.value()));
 		if (env != null) {
 			finalEnv.addAll(Arrays.asList(env));
 		}

@@ -2,12 +2,10 @@ package com.github.qzagarese.dockerunit;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.junit.rules.TestRule;
@@ -22,6 +20,7 @@ import com.github.qzagarese.dockerunit.exception.ConfigException;
 import com.github.qzagarese.dockerunit.internal.ServiceContextBuilder;
 import com.github.qzagarese.dockerunit.internal.ServiceContextBuilderFactory;
 import com.github.qzagarese.dockerunit.internal.UsageDescriptor;
+import com.github.qzagarese.dockerunit.internal.lifecycle.DockerUnitSetup;
 import com.github.qzagarese.dockerunit.internal.reflect.DependencyDescriptorBuilderFactory;
 import com.github.qzagarese.dockerunit.internal.reflect.UsageDescriptorBuilder;
 import com.github.qzagarese.dockerunit.internal.service.DefaultServiceContext;
@@ -81,10 +80,7 @@ public class DockerUnitRule implements TestRule {
         ServiceLoader<DiscoveryProviderFactory> loader = ServiceLoader.load(DiscoveryProviderFactory.class);
        
         this.discoveryProvider = StreamSupport.stream(loader.spliterator(), false)
-                .map(impl -> {
-                    logger.info("Found discovery provider factory of type " + impl.getClass().getSimpleName());
-                    return impl;
-                })
+                .peek(impl -> logger.info("Found discovery provider factory of type " + impl.getClass().getSimpleName()))
                 .findFirst()
                 .map(impl -> {
                     logger.info("Using discovery provider factory " + impl.getClass().getSimpleName());
@@ -121,42 +117,20 @@ public class DockerUnitRule implements TestRule {
       
         // Build discovery context
         this.discoveryContext = contextBuilder.buildContext(discoveryProviderDescriptor);
-        if(!discoveryContext.checkStatus(Status.STARTED)) {
+        if (!discoveryContext.checkStatus(Status.STARTED)) {
             throw new RuntimeException(discoveryContext.getFormattedErrors());
         }
-
         
-        // Create containers and perform discovery one service at the time
-        List<ServiceContext> serviceContexts = descriptor.getDependencies().stream()
-            .map(contextBuilder::buildServiceContext)
-            .map(ctx -> {
-                if (!ctx.checkStatus(Status.STARTED)) {
-                    throw new RuntimeException(ctx.getFormattedErrors());
-                }
-                logger.info("Performing discovery for service " + ctx.getServices().stream().findFirst().get().getName());
-                return discoveryProvider.populateRegistry(ctx);
-            })
-            .collect(Collectors.toList());  
+        ServiceContext completeContext = new DockerUnitSetup(contextBuilder, discoveryProvider).setup(descriptor);
         
-        ServiceContext completeContext = mergeContexts(serviceContexts);
         activeContexts.put(this.serviceContextName, completeContext);
-        if(!completeContext.checkStatus(Status.DISCOVERED)) {
+        if (!completeContext.checkStatus(Status.DISCOVERED)) {
             throw new RuntimeException(completeContext.getFormattedErrors());
         }
         
     }
 
-    private ServiceContext mergeContexts(List<ServiceContext> serviceContexts) {
-        ServiceContext completeContext = null;
-        if (serviceContexts.size() > 0) {
-            completeContext = serviceContexts.remove(0);
-        }
-        for (ServiceContext serviceContext : serviceContexts) {
-            completeContext = completeContext.merge(serviceContext);
-        }
-        return completeContext;
-    }
-
+	
     private void doTeardown() {
         ServiceContext context = activeContexts.get(this.serviceContextName);
         if (context != null) {

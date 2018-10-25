@@ -141,7 +141,7 @@ import com.jayway.restassured.RestAssured;
 public class MyServiceTest {
 
 	@Rule
-	DockerUnitRule rule = new DockerUnitRule();
+	public DockerUnitRule rule = new DockerUnitRule();
 
 	private ServiceContext context;
     
