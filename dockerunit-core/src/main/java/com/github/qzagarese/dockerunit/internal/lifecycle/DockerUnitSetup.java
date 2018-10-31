@@ -33,7 +33,6 @@ public class DockerUnitSetup {
             .map(ctx -> {
                 if (!ctx.checkStatus(Status.STARTED)) {
                 	failureOccured.set(true);
-                    return abortService(ctx);
                 }
                 return ctx;
             }).map(ctx -> {
@@ -66,9 +65,14 @@ public class DockerUnitSetup {
 
 	private Set<ServiceInstance> abortInstances(Service svc) {
 		return svc.getInstances().stream()
-			.map(si -> si.withStatus(Status.ABORTED)
-					.withStatusDetails("Aborted due to previous failure."))
-		.collect(Collectors.toSet());
+			.map(si -> {
+			    if (!si.getStatus().equals(Status.ABORTED)) {
+			        return si.withStatus(Status.ABORTED)
+			                .withStatusDetails("Aborted due to previous failure.");
+			    }
+			    return si;
+			})
+			.collect(Collectors.toSet());
 	}
     
     private ServiceContext mergeContexts(List<ServiceContext> serviceContexts) {

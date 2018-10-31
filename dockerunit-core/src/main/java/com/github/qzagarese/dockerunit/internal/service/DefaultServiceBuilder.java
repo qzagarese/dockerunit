@@ -98,7 +98,7 @@ public class DefaultServiceBuilder implements ServiceBuilder {
 		CompletableFuture<String> respFut = new CompletableFuture<>();
 		ListImagesCmd imagesCmd = client.listImagesCmd().withImageNameFilter(cmd.getImage());
 		List<Image> imagesList = imagesCmd.exec();
-		boolean imageAbsent = imagesList == null || imagesList.size() == 0;
+		boolean imageAbsent = imagesList == null || imagesList.isEmpty();
 		CompletableFuture<Void> pullFut;
 		if(imageAbsent || pullStrategy.equals(PullStrategy.ALWAYS)) {
 			pullFut = pullImage(cmd, client);
@@ -108,7 +108,9 @@ public class DefaultServiceBuilder implements ServiceBuilder {
 		
 		pullFut
 			.exceptionally(ex -> {
-				logger.warning("An error occurred while executing a docker pull operation: " + ex.getMessage());
+				String msg = "An error occurred while pulling image " + cmd.getImage() + " - " + ex.getMessage();
+                logger.warning(msg);
+                respFut.completeExceptionally(new RuntimeException(msg));
 				return null;
 			}).thenRun(() -> {
 				String containerId = startContainer(cmd, client);
@@ -149,14 +151,13 @@ public class DefaultServiceBuilder implements ServiceBuilder {
 			@Override
 			public void onNext(PullResponseItem object) {
 				if(object.getId() != null) {
-					logger.info("Pulling image " + object.getId() + "...");
+					logger.info("Pulling layer " + object.getId() + "...");
 				}
 			}
 
 			@Override
 			public void onError(Throwable throwable) {
-				pullFut.completeExceptionally(
-						new RuntimeException("Failed pulling image " + cmd.getImage(), throwable));
+				pullFut.completeExceptionally(throwable);
 			}
 
 			@Override

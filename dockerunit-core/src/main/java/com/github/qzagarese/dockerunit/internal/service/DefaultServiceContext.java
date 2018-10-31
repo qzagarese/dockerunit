@@ -1,7 +1,9 @@
 package com.github.qzagarese.dockerunit.internal.service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -74,7 +76,11 @@ public class DefaultServiceContext implements ServiceContext {
 
     @Override
 	public String getFormattedErrors() {
-		return services.values().stream()
+		List<Service> orderedServices = services.values().stream()
+		    .collect(Collectors.toList());
+		orderedServices.sort((a, b) -> a.getDescriptor().getOrder() < b.getDescriptor().getOrder() ? -1 : 1);
+		
+        return orderedServices.stream()
 			.map(s -> "\nService: " + s.getName() 
 				+ "\nErrors:\n\t" + 
 				s.getWarnings().stream()
