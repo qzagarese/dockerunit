@@ -4,8 +4,10 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -96,12 +98,14 @@ public class DefaultServiceBuilder implements ServiceBuilder {
 
 	private String createAndStartContainer(CreateContainerCmd cmd, PullStrategy pullStrategy, DockerClient client) {
 		CompletableFuture<String> respFut = new CompletableFuture<>();
-		ListImagesCmd imagesCmd = client.listImagesCmd().withImageNameFilter(cmd.getImage());
-		List<Image> imagesList = imagesCmd.exec();
-		boolean imageAbsent = imagesList == null || imagesList.isEmpty();
 		CompletableFuture<Void> pullFut;
-		if(imageAbsent || pullStrategy.equals(PullStrategy.ALWAYS)) {
-			pullFut = pullImage(cmd, client);
+		
+		String imageName = computeImageName(cmd.getImage());
+		
+		Optional<Image> image = findImage(imageName, client);
+		
+		if(!image.isPresent() || pullStrategy.equals(PullStrategy.ALWAYS)) {
+			pullFut = pullImage(imageName, client);
 		} else {
 			pullFut = CompletableFuture.completedFuture(null);
 		}
@@ -127,8 +131,27 @@ public class DefaultServiceBuilder implements ServiceBuilder {
 		return respFut.join();
 	}
 
-	private CompletableFuture<Void> pullImage(CreateContainerCmd cmd, DockerClient client) {
-		PullImageCmd pullImageCmd = client.pullImageCmd(cmd.getImage());
+    private String computeImageName(String cmdImageName) {
+        return Arrays.asList(cmdImageName).stream()
+	            .filter(s -> s.lastIndexOf("/") > s.lastIndexOf(":"))
+	            .findFirst()
+	            .map(s -> s += ":latest")
+	            .orElse(cmdImageName);
+    }
+
+    private Optional<Image> findImage(String imageName, DockerClient client) {
+        ListImagesCmd imagesCmd = client.listImagesCmd().withImageNameFilter(imageName);
+		List<Image> imagesList = imagesCmd.exec();
+		if (imagesList == null || imagesList.isEmpty()) {
+		    return Optional.empty();
+		}
+		
+		return imagesList.stream()
+		        .findFirst();
+    }
+
+	private CompletableFuture<Void> pullImage(String imageName, DockerClient client) {
+		PullImageCmd pullImageCmd = client.pullImageCmd(imageName);
 		CompletableFuture<Void> pullFut = new CompletableFuture<Void>();
 		ResultCallback<PullResponseItem> resultCallback = new ResultCallback<PullResponseItem>() {
 
