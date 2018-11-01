@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -112,7 +113,7 @@ public class DefaultServiceBuilder implements ServiceBuilder {
 		
 		pullFut
 			.exceptionally(ex -> {
-				String msg = "An error occurred while pulling image " + cmd.getImage() + " - " + ex.getMessage();
+				String msg = String.format("An error occurred while pulling image %s - %s", imageName, ex.getMessage());
                 logger.warning(msg);
                 respFut.completeExceptionally(new RuntimeException(msg));
 				return null;

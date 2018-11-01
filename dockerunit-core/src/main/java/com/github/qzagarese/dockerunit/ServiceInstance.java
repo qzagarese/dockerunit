@@ -119,5 +119,15 @@ public class ServiceInstance {
 		return status;
 	}
     
+	/**
+	 * Checks whether the instance is in the specified status.
+	 * 
+	 * 
+	 * @param status the specified status
+	 * @return true if the instance is in the specified status, false otherwise.
+	 */
+	public boolean hasStatus(Status status) {
+	    return getStatus().equals(status);
+	}
     
 }

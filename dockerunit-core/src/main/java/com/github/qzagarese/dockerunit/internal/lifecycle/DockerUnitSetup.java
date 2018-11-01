@@ -65,15 +65,17 @@ public class DockerUnitSetup {
 
 	private Set<ServiceInstance> abortInstances(Service svc) {
 		return svc.getInstances().stream()
-			.map(si -> {
-			    if (!si.getStatus().equals(Status.ABORTED)) {
-			        return si.withStatus(Status.ABORTED)
-			                .withStatusDetails("Aborted due to previous failure.");
-			    }
-			    return si;
-			})
+			.map(si -> ensureStatus(si, Status.ABORTED, "Aborted due to previous failure."))
 			.collect(Collectors.toSet());
 	}
+
+    private ServiceInstance ensureStatus(ServiceInstance si, Status status, String statusDetails) {
+        if (!si.hasStatus(status)) {
+            return si.withStatus(status)
+                    .withStatusDetails(statusDetails);
+        }
+        return si;
+    }
     
     private ServiceContext mergeContexts(List<ServiceContext> serviceContexts) {
         ServiceContext completeContext = null;
