@@ -111,13 +111,6 @@ public class ServiceInstance {
 		return statusDetails;
 	}
 
-	/**
-	 * @return the status of this instance.
-	 * @see Status
-	 */
-	public Status getStatus() {
-		return status;
-	}
     
 	/**
 	 * Checks whether the instance is in the specified status.
@@ -127,7 +120,7 @@ public class ServiceInstance {
 	 * @return true if the instance is in the specified status, false otherwise.
 	 */
 	public boolean hasStatus(Status status) {
-	    return getStatus().equals(status);
+	    return this.status.equals(status);
 	}
     
 }

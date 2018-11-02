@@ -4,7 +4,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -157,6 +156,7 @@ public class DefaultServiceBuilder implements ServiceBuilder {
 		ResultCallback<PullResponseItem> resultCallback = new ResultCallback<PullResponseItem>() {
 
 			private Closeable closeable;
+			private DockerPullStatusManager manager = new DockerPullStatusManager(imageName);
 			
 			@Override
 			public void close() throws IOException {
@@ -174,9 +174,7 @@ public class DefaultServiceBuilder implements ServiceBuilder {
 
 			@Override
 			public void onNext(PullResponseItem object) {
-				if(object.getId() != null) {
-					logger.info("Pulling layer " + object.getId() + "...");
-				}
+			    System.out.print(manager.update(object));
 			}
 
 			@Override

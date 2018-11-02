@@ -55,7 +55,7 @@ public class Service {
      */
     public boolean checkStatus(Status status) {
         return instances.stream()
-                .allMatch(si -> si.getStatus().equals(status));
+                .allMatch(si -> si.hasStatus(status));
     }
 
     /**
@@ -93,7 +93,7 @@ public class Service {
     }
         
     private boolean isAborted(ServiceInstance i) {
-    	return i.getStatus().equals(Status.ABORTED);
+    	return i.hasStatus(Status.ABORTED);
     }
     
 }

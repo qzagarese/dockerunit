@@ -70,11 +70,8 @@ public class DockerUnitSetup {
 	}
 
     private ServiceInstance ensureStatus(ServiceInstance si, Status status, String statusDetails) {
-        if (!si.hasStatus(status)) {
-            return si.withStatus(status)
-                    .withStatusDetails(statusDetails);
-        }
-        return si;
+        return si.hasStatus(status) ? si : si.withStatus(status)
+                .withStatusDetails(statusDetails);
     }
     
     private ServiceContext mergeContexts(List<ServiceContext> serviceContexts) {
