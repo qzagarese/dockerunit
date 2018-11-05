@@ -38,4 +38,26 @@ public @interface EnableConsul {
 	 */
 	int pollingInterval() default 1;
 
+	
+	/**
+	 * The amount of time to wait before Consul performs the first health check.
+	 * Default is 0.
+	 * 
+	 * @return the delay in seconds
+	 */
+	int initialDelay() default 0;
+	
+	
+	/**
+	 * The initial status for the Consul check associated to this service. Default is PASSING.
+	 * 
+	 * @return
+	 */
+	CheckStatus checkInitialStatus() default CheckStatus.PASSING;
+
+    
+    public enum CheckStatus {
+        PASSING, CRITICAL
+    }
+    
 }

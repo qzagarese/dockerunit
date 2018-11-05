@@ -7,7 +7,7 @@ import java.util.List;
 import com.github.qzagarese.dockerunit.annotation.Image;
 import com.github.qzagarese.dockerunit.annotation.Named;
 
-public interface TestDescriptor {
+public interface ServiceDescriptor {
 
     Image getImage();
     

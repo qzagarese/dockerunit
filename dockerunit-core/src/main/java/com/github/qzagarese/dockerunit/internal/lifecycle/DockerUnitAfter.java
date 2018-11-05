@@ -23,9 +23,6 @@ public class DockerUnitAfter extends Statement {
 	public void evaluate() throws Throwable {
 		try {
 			statement.evaluate();
-		} catch(Throwable t) {
-			t.printStackTrace();
-			throw t;
 		} finally {
 			ServiceContext context = runner.getContext(method);
 			if(context != null) {

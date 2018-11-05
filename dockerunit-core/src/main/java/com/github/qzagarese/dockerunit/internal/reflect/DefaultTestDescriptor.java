@@ -6,14 +6,14 @@ import java.util.List;
 
 import com.github.qzagarese.dockerunit.annotation.Image;
 import com.github.qzagarese.dockerunit.annotation.Named;
-import com.github.qzagarese.dockerunit.internal.TestDescriptor;
+import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
-public class DefaultTestDescriptor implements TestDescriptor {
+public class DefaultTestDescriptor implements ServiceDescriptor {
 
     private Image image;
     private Named named;

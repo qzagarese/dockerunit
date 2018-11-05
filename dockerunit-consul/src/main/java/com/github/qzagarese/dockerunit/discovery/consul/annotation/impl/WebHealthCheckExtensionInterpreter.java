@@ -8,7 +8,7 @@ import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.qzagarese.dockerunit.annotation.ExtensionInterpreter;
 import com.github.qzagarese.dockerunit.discovery.consul.annotation.WebHealthCheck;
 import com.github.qzagarese.dockerunit.discovery.consul.annotation.WebHealthCheck.WebProtocol;
-import com.github.qzagarese.dockerunit.internal.TestDescriptor;
+import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 
 public class WebHealthCheckExtensionInterpreter implements ExtensionInterpreter<WebHealthCheck> {
 
@@ -18,7 +18,7 @@ public class WebHealthCheckExtensionInterpreter implements ExtensionInterpreter<
 	private static final String SERVICE_CHECK_INTERVAL = SERVICE_PREFIX + "CHECK_INTERVAL";
 
 	@Override
-	public CreateContainerCmd build(TestDescriptor td, CreateContainerCmd cmd, WebHealthCheck whc) {
+	public CreateContainerCmd build(ServiceDescriptor td, CreateContainerCmd cmd, WebHealthCheck whc) {
 		final String serviceNameEnv = SERVICE_PREFIX + whc.exposedPort() + SERVICE_NAME_SUFFIX + "=" + td.getNamed().value();
 		final String serviceCheckScriptEnv = SERVICE_CHECK_SCRIPT + "=`which curl` -f " 
 				+ (whc.protocol().equals(WebProtocol.HTTPS) ? "-sSk " : "")

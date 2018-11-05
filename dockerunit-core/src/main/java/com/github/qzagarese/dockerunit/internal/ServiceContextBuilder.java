@@ -4,8 +4,10 @@ import com.github.qzagarese.dockerunit.ServiceContext;
 
 public interface ServiceContextBuilder {
 
-    ServiceContext buildContext(DependencyDescriptor descriptor);
+    ServiceContext buildContext(UsageDescriptor descriptor);
 
+    ServiceContext buildServiceContext(ServiceDescriptor descriptor);
+    
 	ServiceContext clearContext(ServiceContext context); 
     
 }
