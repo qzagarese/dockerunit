@@ -19,37 +19,37 @@ import com.github.qzagarese.dockerunit.annotation.ExtensionMarker;
 import com.github.qzagarese.dockerunit.annotation.Image;
 import com.github.qzagarese.dockerunit.annotation.Named;
 import com.github.qzagarese.dockerunit.annotation.Use;
-import com.github.qzagarese.dockerunit.internal.UsageDescriptor;
-import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
+import com.github.qzagarese.dockerunit.internal.DependencyDescriptor;
+import com.github.qzagarese.dockerunit.internal.TestDescriptor;
 import com.github.qzagarese.dockerunit.internal.reflect.DefaultTestDescriptor.DefaultTestDescriptorBuilder;
 
-public class DefaultDependencyDescriptorBuilder implements UsageDescriptorBuilder {
+public class DefaultDependencyDescriptorBuilder implements DependencyDescriptorBuilder {
 
     @Override
-    public UsageDescriptor buildDescriptor(FrameworkMethod method) {
+    public DependencyDescriptor buildDescriptor(FrameworkMethod method) {
        return buildDescriptor((AnnotatedElement) method.getMethod());
     }
 
     
     @Override
-    public UsageDescriptor buildDescriptor(Class<?> klass) {
+    public DependencyDescriptor buildDescriptor(Class<?> klass) {
     	 return buildDescriptor((AnnotatedElement)klass);
      }
     
-    private UsageDescriptor buildDescriptor(AnnotatedElement element) {
+    private DependencyDescriptor buildDescriptor(AnnotatedElement element) {
     	List<Use> requirements = getDependencies(element);
-        List<ServiceDescriptor> descriptors = asDescriptors(requirements);
+        List<TestDescriptor> descriptors = asDescriptors(requirements);
         return new DefaultDependencyDescriptor(descriptors);
     }
     
-    private List<ServiceDescriptor> asDescriptors(List<Use> requirements) {
-        List<ServiceDescriptor> descriptors = requirements.stream()
+    private List<TestDescriptor> asDescriptors(List<Use> requirements) {
+        List<TestDescriptor> descriptors = requirements.stream()
             .map(use -> buildDescriptor(use))
             .collect(Collectors.toList());
         return descriptors;
     }
 
-    private ServiceDescriptor buildDescriptor(Use use) {
+    private TestDescriptor buildDescriptor(Use use) {
         DefaultTestDescriptorBuilder builder = DefaultTestDescriptor.builder();
         
         checkServiceClass(use.service());

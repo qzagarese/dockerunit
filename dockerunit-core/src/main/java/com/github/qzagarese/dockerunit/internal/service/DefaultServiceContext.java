@@ -1,9 +1,7 @@
 package com.github.qzagarese.dockerunit.internal.service;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,7 +9,6 @@ import java.util.stream.Collectors;
 import com.github.qzagarese.dockerunit.Service;
 import com.github.qzagarese.dockerunit.ServiceContext;
 import com.github.qzagarese.dockerunit.ServiceInstance;
-import com.github.qzagarese.dockerunit.ServiceInstance.Status;
 
 public class DefaultServiceContext implements ServiceContext {
 
@@ -66,21 +63,8 @@ public class DefaultServiceContext implements ServiceContext {
 	}
 
 	@Override
-    public boolean checkStatus(Status status) {
-	    return services.isEmpty() ||
-                services.values().stream()
-                .map(s -> s.checkStatus(status))
-                .reduce((b1, b2) -> b1 && b2)
-                .get();
-    }
-
-    @Override
 	public String getFormattedErrors() {
-		List<Service> orderedServices = services.values().stream()
-		    .collect(Collectors.toList());
-		orderedServices.sort((a, b) -> a.getDescriptor().getOrder() < b.getDescriptor().getOrder() ? -1 : 1);
-		
-        return orderedServices.stream()
+		return services.values().stream()
 			.map(s -> "\nService: " + s.getName() 
 				+ "\nErrors:\n\t" + 
 				s.getWarnings().stream()

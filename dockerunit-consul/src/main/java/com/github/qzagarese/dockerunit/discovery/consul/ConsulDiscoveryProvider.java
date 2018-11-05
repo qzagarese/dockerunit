@@ -22,8 +22,6 @@ import com.github.qzagarese.dockerunit.ServiceContext;
 import com.github.qzagarese.dockerunit.ServiceInstance;
 import com.github.qzagarese.dockerunit.ServiceInstance.Status;
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProvider;
-import com.github.qzagarese.dockerunit.discovery.consul.annotation.EnableConsul;
-import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 import com.github.qzagarese.dockerunit.internal.docker.DefaultDockerClientProvider;
 import com.github.qzagarese.dockerunit.internal.service.DefaultServiceContext;
 
@@ -71,7 +69,7 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 		List<ServiceRecord> records;
 		try {
 			records = resolver.resolveService(s.getName(), s.getInstances().size(), 
-					discoveryTimeout, consulPollingPeriod, extractInitialDelay(s.getDescriptor()));
+					discoveryTimeout, consulPollingPeriod);
 		} catch (Exception e) {
 			return s.withInstances(s.getInstances().stream()
 					.map(i -> i.withStatus(Status.ABORTED)
@@ -91,16 +89,7 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 		return s.withInstances(withPorts);
 	}
 
-	private int extractInitialDelay(ServiceDescriptor descriptor) {
-	    return descriptor.getOptions().stream()
-	        .filter(EnableConsul.class::isInstance)
-	        .findFirst()
-	        .map(EnableConsul.class::cast)
-	        .map(EnableConsul::initialDelay)
-	        .orElse(0);
-    }
-
-    private Service doCleanup(Service current, Service global) {
+	private Service doCleanup(Service current, Service global) {
 		try {
 			int expectedRecords = global != null? global.getInstances().size() : 0;
 			resolver.verifyCleanup(current.getName() + CONSUL_DNS_SUFFIX, expectedRecords, discoveryTimeout, consulPollingPeriod);
@@ -123,20 +112,22 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 	}
 
 	private boolean matchPort(ServiceRecord record, InspectContainerResponse r) {
-		return r.getNetworkSettings().getPorts().getBindings().values()
-                .stream()
-                .map(bindings -> Optional.ofNullable(bindings).orElse(new Binding[]{}))
-                .filter(b -> b.length > 0)
-                .map(b -> parsePort(b[0].getHostPortSpec()))
-                .anyMatch(port -> record.getPort() == port.orElse(-1));
+		Optional<Binding[]> opt = r.getNetworkSettings().getPorts().getBindings()
+			.values().stream()
+			.filter(b -> b.length > 0 
+					&& isInt(b[0].getHostPortSpec()) 
+					&& record.getPort() == Integer.parseInt(b[0].getHostPortSpec()))
+			.findFirst();	
+		return opt.isPresent();
 	}
 
-	private Optional<Integer> parsePort(String s) {
-        try {
-            return Optional.of(Integer.parseInt(s));
-        } catch (NumberFormatException nfe) {
-            return Optional.empty();
-        }
-    }
-	
+	private boolean isInt(String hostPortSpec) {
+		try {
+			Integer.parseInt(hostPortSpec);
+			return true;
+		} catch (NumberFormatException nfe) {
+			return false;
+		}
+	}
+
 }

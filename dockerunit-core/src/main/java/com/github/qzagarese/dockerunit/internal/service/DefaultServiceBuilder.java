@@ -4,10 +4,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -34,23 +32,23 @@ import com.github.qzagarese.dockerunit.annotation.ExtensionMarker;
 import com.github.qzagarese.dockerunit.annotation.Image.PullStrategy;
 import com.github.qzagarese.dockerunit.exception.ContainerException;
 import com.github.qzagarese.dockerunit.internal.ServiceBuilder;
-import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
+import com.github.qzagarese.dockerunit.internal.TestDescriptor;
 
 public class DefaultServiceBuilder implements ServiceBuilder {
 
-	private final static Logger logger = Logger.getLogger(DefaultServiceBuilder.class.getSimpleName());
+	private final Logger logger = Logger.getLogger(this.getClass().getSimpleName());
 	
     @Override
-    public Service build(ServiceDescriptor descriptor, DockerClient client) {
+    public Service build(TestDescriptor descriptor, DockerClient client) {
         Set<ServiceInstance> instances = new HashSet<>();
         for (int i = 0; i < descriptor.getReplicas(); i++) {
             instances.add(createInstance(descriptor, client, i));
         }
         return new Service(descriptor.getNamed()
-            .value(), instances, descriptor);
+            .value(), instances);
     }
 
-    private ServiceInstance createInstance(ServiceDescriptor descriptor, DockerClient client, int i) {
+    private ServiceInstance createInstance(TestDescriptor descriptor, DockerClient client, int i) {
         CreateContainerCmd cmd = client.createContainerCmd(descriptor.getImage().value());
         cmd = computeContainerName(descriptor, i, cmd);
         cmd = executeOptionBuilders(descriptor, cmd);
@@ -85,7 +83,7 @@ public class DefaultServiceBuilder implements ServiceBuilder {
                 .build();
     }
 
-	private CreateContainerCmd computeContainerName(ServiceDescriptor dependency, int i, CreateContainerCmd cmd) {
+	private CreateContainerCmd computeContainerName(TestDescriptor dependency, int i, CreateContainerCmd cmd) {
 		if (!dependency.getContainerName()
             .isEmpty()) {
             String name = dependency.getReplicas() > 1 
@@ -98,23 +96,19 @@ public class DefaultServiceBuilder implements ServiceBuilder {
 
 	private String createAndStartContainer(CreateContainerCmd cmd, PullStrategy pullStrategy, DockerClient client) {
 		CompletableFuture<String> respFut = new CompletableFuture<>();
+		ListImagesCmd imagesCmd = client.listImagesCmd().withImageNameFilter(cmd.getImage());
+		List<Image> imagesList = imagesCmd.exec();
+		boolean imageAbsent = imagesList == null || imagesList.size() == 0;
 		CompletableFuture<Void> pullFut;
-		
-		String imageName = computeImageName(cmd.getImage());
-		
-		Optional<Image> image = findImage(imageName, client);
-		
-		if(!image.isPresent() || pullStrategy.equals(PullStrategy.ALWAYS)) {
-			pullFut = pullImage(imageName, client);
+		if(imageAbsent || pullStrategy.equals(PullStrategy.ALWAYS)) {
+			pullFut = pullImage(cmd, client);
 		} else {
 			pullFut = CompletableFuture.completedFuture(null);
 		}
 		
 		pullFut
 			.exceptionally(ex -> {
-				String msg = String.format("An error occurred while pulling image %s - %s", imageName, ex.getMessage());
-                logger.warning(msg);
-                respFut.completeExceptionally(new RuntimeException(msg));
+				logger.warning("An error occurred while executing a docker pull operation: " + ex.getMessage());
 				return null;
 			}).thenRun(() -> {
 				String containerId = startContainer(cmd, client);
@@ -131,32 +125,12 @@ public class DefaultServiceBuilder implements ServiceBuilder {
 		return respFut.join();
 	}
 
-    private String computeImageName(String cmdImageName) {
-        return Arrays.asList(cmdImageName).stream()
-	            .filter(s -> s.lastIndexOf("/") > s.lastIndexOf(":"))
-	            .findFirst()
-	            .map(s -> s += ":latest")
-	            .orElse(cmdImageName);
-    }
-
-    private Optional<Image> findImage(String imageName, DockerClient client) {
-        ListImagesCmd imagesCmd = client.listImagesCmd().withImageNameFilter(imageName);
-		List<Image> imagesList = imagesCmd.exec();
-		if (imagesList == null || imagesList.isEmpty()) {
-		    return Optional.empty();
-		}
-		
-		return imagesList.stream()
-		        .findFirst();
-    }
-
-	private CompletableFuture<Void> pullImage(String imageName, DockerClient client) {
-		PullImageCmd pullImageCmd = client.pullImageCmd(imageName);
+	private CompletableFuture<Void> pullImage(CreateContainerCmd cmd, DockerClient client) {
+		PullImageCmd pullImageCmd = client.pullImageCmd(cmd.getImage());
 		CompletableFuture<Void> pullFut = new CompletableFuture<Void>();
 		ResultCallback<PullResponseItem> resultCallback = new ResultCallback<PullResponseItem>() {
 
 			private Closeable closeable;
-			private DockerPullStatusManager manager = new DockerPullStatusManager(imageName);
 			
 			@Override
 			public void close() throws IOException {
@@ -174,12 +148,15 @@ public class DefaultServiceBuilder implements ServiceBuilder {
 
 			@Override
 			public void onNext(PullResponseItem object) {
-			    System.out.print(manager.update(object));
+				if(object.getId() != null) {
+					logger.info("Pulling image " + object.getId() + "...");
+				}
 			}
 
 			@Override
 			public void onError(Throwable throwable) {
-				pullFut.completeExceptionally(throwable);
+				pullFut.completeExceptionally(
+						new RuntimeException("Failed pulling image " + cmd.getImage(), throwable));
 			}
 
 			@Override
@@ -217,7 +194,7 @@ public class DefaultServiceBuilder implements ServiceBuilder {
         return cmd;
     }
 
-    private CreateContainerCmd executeOptionBuilders(ServiceDescriptor descriptor, CreateContainerCmd cmd) {
+    private CreateContainerCmd executeOptionBuilders(TestDescriptor descriptor, CreateContainerCmd cmd) {
         for (Annotation a : descriptor.getOptions()) {
             Class<? extends ExtensionInterpreter<?>> builderType = a.annotationType().getAnnotation(ExtensionMarker.class)
                 .value();
@@ -234,7 +211,7 @@ public class DefaultServiceBuilder implements ServiceBuilder {
                     e);
             }
             try {
-            	buildMethod = builderType.getDeclaredMethod("build", new Class<?>[] {ServiceDescriptor.class, CreateContainerCmd.class, a.annotationType() });
+            	buildMethod = builderType.getDeclaredMethod("build", new Class<?>[] {TestDescriptor.class, CreateContainerCmd.class, a.annotationType() });
                 cmd = (CreateContainerCmd) buildMethod.invoke(builder, descriptor, cmd, a);
             } catch (Exception e) {
                 throw new RuntimeException(

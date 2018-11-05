@@ -8,7 +8,6 @@ import com.github.qzagarese.dockerunit.ServiceInstance.Status;
 import com.github.qzagarese.dockerunit.annotation.Image;
 import com.github.qzagarese.dockerunit.annotation.Named;
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProvider;
-import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 
 import lombok.AllArgsConstructor;
 import lombok.experimental.Wither;
@@ -35,7 +34,6 @@ public class Service {
 
     private final String name;
     private final Set<ServiceInstance> instances;
-    private final ServiceDescriptor descriptor;
     
     /**
      *  
@@ -45,17 +43,6 @@ public class Service {
     	return !instances.stream()
     			.filter(this::isAborted)
     			.findFirst().isPresent();
-    }
-
-    /**
-     * Checks whether all the {@link ServiceInstance}s in this service are in the specified {@link Status}.
-     * 
-     * @param status the {@link Status} to check
-     * @return true if all the {@link ServiceInstance}s in this service are in the specified status, false otherwise.
-     */
-    public boolean checkStatus(Status status) {
-        return instances.stream()
-                .allMatch(si -> si.hasStatus(status));
     }
 
     /**
@@ -75,16 +62,6 @@ public class Service {
     	return this.instances;
     }
     
-    
-    /**
-     * 
-     * @return the descriptor of this service that provides the runtime representation of the annotation based
-     * configuration that has been used.
-     */
-    public ServiceDescriptor getDescriptor() {
-        return this.descriptor;
-    }
-    
     public List<String> getWarnings() {
     	return instances.stream()
     			.filter(this::isAborted)
@@ -93,7 +70,7 @@ public class Service {
     }
         
     private boolean isAborted(ServiceInstance i) {
-    	return i.hasStatus(Status.ABORTED);
+    	return i.getStatus().equals(Status.ABORTED);
     }
     
 }

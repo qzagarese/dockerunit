@@ -7,7 +7,7 @@ public class DependencyDescriptorBuilderFactory {
     
     private static final DefaultDependencyDescriptorBuilder INSTANCE = new DefaultDependencyDescriptorBuilder();
 
-    public static  UsageDescriptorBuilder create(){
+    public static  DependencyDescriptorBuilder create(){
         return INSTANCE;
     }
     

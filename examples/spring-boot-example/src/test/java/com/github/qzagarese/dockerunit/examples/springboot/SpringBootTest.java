@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(DockerUnitRunner.class)
 @Category(ContainerTest.class)
-public class RunnerBasedTest {
+public class SpringBootTest {
 
 	@Test
 	@Use(service=BaseDescriptor.class)

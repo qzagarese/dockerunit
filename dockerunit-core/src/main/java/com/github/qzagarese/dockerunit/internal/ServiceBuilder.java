@@ -5,7 +5,7 @@ import com.github.qzagarese.dockerunit.Service;
 
 public interface ServiceBuilder {
 
-    Service build(ServiceDescriptor descriptor, DockerClient client);
+    Service build(TestDescriptor descriptor, DockerClient client);
 
 	Service cleanup(Service s, DockerClient client);
     

@@ -16,7 +16,7 @@ import org.junit.runners.model.Statement;
 
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProvider;
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProviderFactory;
-import com.github.qzagarese.dockerunit.internal.UsageDescriptor;
+import com.github.qzagarese.dockerunit.internal.DependencyDescriptor;
 import com.github.qzagarese.dockerunit.internal.ServiceContextBuilder;
 import com.github.qzagarese.dockerunit.internal.ServiceContextBuilderFactory;
 import com.github.qzagarese.dockerunit.internal.lifecycle.InvokeDockerUnitMethod;
@@ -24,7 +24,7 @@ import com.github.qzagarese.dockerunit.internal.lifecycle.DockerUnitAfter;
 import com.github.qzagarese.dockerunit.internal.lifecycle.DockerUnitAfterClass;
 import com.github.qzagarese.dockerunit.internal.lifecycle.DockerUnitBefore;
 import com.github.qzagarese.dockerunit.internal.lifecycle.DockerUnitBeforeClass;
-import com.github.qzagarese.dockerunit.internal.reflect.UsageDescriptorBuilder;
+import com.github.qzagarese.dockerunit.internal.reflect.DependencyDescriptorBuilder;
 import com.github.qzagarese.dockerunit.internal.reflect.DependencyDescriptorBuilderFactory;
 
 /**
@@ -42,11 +42,11 @@ public class DockerUnitRunner extends BlockJUnit4ClassRunner {
 	private final Map<FrameworkMethod, ServiceContext> methodsContexts = new HashMap<>();
 	private ServiceContext classContext;
 	private ServiceContext discoveryContext;
-	private final UsageDescriptorBuilder descriptorBuilder = DependencyDescriptorBuilderFactory.create();
+	private final DependencyDescriptorBuilder descriptorBuilder = DependencyDescriptorBuilderFactory.create();
 	private final ServiceContextBuilder contextBuilder = ServiceContextBuilderFactory.create();
 	private final DiscoveryProvider discoveryProvider;
 	
-	private static final Logger logger = Logger.getLogger(DockerUnitRunner.class.getSimpleName());
+	private final Logger logger = Logger.getLogger(this.getClass().getSimpleName());
 	
     public DockerUnitRunner(Class<?> klass) throws InitializationError {
         super(klass);
@@ -90,8 +90,8 @@ public class DockerUnitRunner extends BlockJUnit4ClassRunner {
 	@Override
 	protected Statement withBeforeClasses(Statement statement) {
 		Statement next = super.withBeforeClasses(statement);
-		UsageDescriptor descriptor = descriptorBuilder.buildDescriptor(getTestClass().getJavaClass());
-		UsageDescriptor discoveryProviderDescriptor = descriptorBuilder.buildDescriptor(discoveryProvider.getDiscoveryConfig());
+		DependencyDescriptor descriptor = descriptorBuilder.buildDescriptor(getTestClass().getJavaClass());
+		DependencyDescriptor discoveryProviderDescriptor = descriptorBuilder.buildDescriptor(discoveryProvider.getDiscoveryConfig());
 		return new DockerUnitBeforeClass(this, next, discoveryProvider, contextBuilder, descriptor, discoveryProviderDescriptor);
 	}
 
@@ -99,7 +99,7 @@ public class DockerUnitRunner extends BlockJUnit4ClassRunner {
 	@Override
 	protected Statement withBefores(FrameworkMethod method, Object target, Statement statement) {
 		Statement next =  super.withBefores(method, target, statement);
-		UsageDescriptor descriptor = descriptorBuilder.buildDescriptor(method);
+		DependencyDescriptor descriptor = descriptorBuilder.buildDescriptor(method);
 		return new DockerUnitBefore(method, this, next, discoveryProvider, contextBuilder, descriptor);
 	}
 	
