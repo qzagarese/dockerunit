@@ -1,5 +1,10 @@
 package com.github.qzagarese.dockerunit.examples.springboot;
 
+import static com.github.qzagarese.dockerunit.examples.springboot.Constants.BAR_VALUE_FROM_DESCRIPTOR;
+import static com.github.qzagarese.dockerunit.examples.springboot.Constants.FOO_VALUE_FROM_IMAGE;
+import static com.github.qzagarese.dockerunit.examples.springboot.Constants.SERVICE_NAME;
+import static org.hamcrest.Matchers.equalTo;
+
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -12,10 +17,8 @@ import com.github.qzagarese.dockerunit.annotation.Use;
 import com.github.qzagarese.dockerunit.examples.springboot.descriptors.BaseDescriptor;
 import com.github.qzagarese.dockerunit.examples.springboot.descriptors.TestConfigVolumeDescriptor;
 import com.github.qzagarese.dockerunit.examples.springboot.descriptors.TestEnvDescriptor;
-import com.jayway.restassured.RestAssured;
 
-import static com.github.qzagarese.dockerunit.examples.springboot.Constants.*;
-import static org.hamcrest.Matchers.equalTo;
+import io.restassured.RestAssured;
 
 @RunWith(DockerUnitRunner.class)
 @Category(ContainerTest.class)

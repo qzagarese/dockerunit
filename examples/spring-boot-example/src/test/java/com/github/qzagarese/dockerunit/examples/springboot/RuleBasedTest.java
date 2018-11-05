@@ -15,7 +15,8 @@ import com.github.qzagarese.dockerunit.ServiceContext;
 import com.github.qzagarese.dockerunit.ServiceInstance;
 import com.github.qzagarese.dockerunit.annotation.Use;
 import com.github.qzagarese.dockerunit.examples.springboot.descriptors.BaseDescriptor;
-import com.jayway.restassured.RestAssured;
+
+import io.restassured.RestAssured;
 
 @Category(ContainerTest.class)
 @Use(service=BaseDescriptor.class, replicas = 2)

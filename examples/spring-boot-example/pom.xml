@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.qzagarese</groupId>
@@ -29,20 +30,20 @@
 		<dependency>
 			<groupId>com.github.qzagarese</groupId>
 			<artifactId>dockerunit-core</artifactId>
-			<version>1.0.0-M3-SNAPSHOT</version>
+			<version>1.0.0-M3</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.github.qzagarese</groupId>
 			<artifactId>dockerunit-consul</artifactId>
-			<version>1.0.0-M3-SNAPSHOT</version>
+			<version>1.0.0-M3</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
-			<groupId>com.jayway.restassured</groupId>
+			<groupId>io.rest-assured</groupId>
 			<artifactId>rest-assured</artifactId>
-			<version>2.9.0</version>
+			<version>3.2.0</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -101,6 +102,11 @@
 								<include>**/*.class</include>
 							</includes>
 							<groups>com.github.qzagarese.dockerunit.examples.springboot.ContainerTest</groups>
+							<classpathDependencyExcludes>
+	 							<classpathDependencyExclude>
+									ch.qos.logback:logback-classic
+								</classpathDependencyExclude>
+							</classpathDependencyExcludes>
 						</configuration>
 					</plugin>
 				</plugins>
