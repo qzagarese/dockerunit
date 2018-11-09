@@ -51,19 +51,20 @@ public class DefaultServiceBuilder implements ServiceBuilder {
     }
 
     private ServiceInstance createInstance(ServiceDescriptor descriptor, DockerClient client, int i) {
-        CreateContainerCmd cmd = client.createContainerCmd(descriptor.getImage().value());
-        cmd = computeContainerName(descriptor, i, cmd);
-        cmd = executeOptionBuilders(descriptor, cmd);
-        if (descriptor.getCustomisationHook() != null) {
-            cmd = executeCustomisationHook(descriptor.getCustomisationHook(), descriptor.getInstance(), cmd);
-        }
         String containerId = null;
         Status status = null;
         String statusDetails = null;
-		try {
-			containerId = createAndStartContainer(cmd, descriptor.getImage().pull(),  client);
-			status = Status.STARTED;
-			statusDetails = "Started.";
+        CreateContainerCmd cmd = null;
+        try {
+            cmd = client.createContainerCmd(descriptor.getImage().value());
+            cmd = computeContainerName(descriptor, i, cmd);
+            cmd = executeOptionBuilders(descriptor, cmd);
+            if (descriptor.getCustomisationHook() != null) {
+                cmd = executeCustomisationHook(descriptor.getCustomisationHook(), descriptor.getInstance(), cmd);
+            }
+   			containerId = createAndStartContainer(cmd, descriptor.getImage().pull(),  client);
+   			status = Status.STARTED;
+   			statusDetails = "Started.";
 		} catch (Throwable t) {
 			if(t instanceof CompletionException) {
 				if(t.getCause() != null && t.getCause() instanceof ContainerException) {
