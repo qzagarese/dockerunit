@@ -65,9 +65,9 @@ public class DefaultServiceBuilder implements ServiceBuilder {
    			containerId = createAndStartContainer(cmd, descriptor.getImage().pull(),  client);
    			status = Status.STARTED;
    			statusDetails = "Started.";
-		} catch (Throwable t) {
-			if(t instanceof CompletionException) {
-				if(t.getCause() != null && t.getCause() instanceof ContainerException) {
+        } catch (Throwable t) {
+		    if(t instanceof CompletionException) {
+			    if(t.getCause() != null && t.getCause() instanceof ContainerException) {
 					containerId = ((ContainerException) t.getCause()).getContainerId();
 					statusDetails = t.getCause().getCause() != null ? t.getCause().getCause().getMessage() : null;
 				} else {
