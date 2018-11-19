@@ -1,5 +1,8 @@
 package com.github.qzagarese.dockerunit.discovery.consul;
 
+import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.*;
+import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.DOCKER_BRIDGE_IP_PROPERTY;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +37,12 @@ public class ConsulDescriptor {
             bindings = new Ports();
         }
         
-        bindings.bind(dnsPort, Binding.bindPort(8600));
+        int dnsBridgePort = Integer.parseInt(System.getProperty(CONSUL_DNS_PORT_BRIDGE_BINDING, 
+                CONSUL_DNS_PORT_BRIDGE_BINDING_DEFAULT));
+
+        bindings.bind(dnsPort, Binding.bindIpAndPort(
+                System.getProperty(DOCKER_BRIDGE_IP_PROPERTY, DOCKER_BRIDGE_IP_DEFAULT), 
+                dnsBridgePort));
         bindings.bind(consulPort, Binding.bindPort(8500));
 
         return cmd.withExposedPorts(ports)
