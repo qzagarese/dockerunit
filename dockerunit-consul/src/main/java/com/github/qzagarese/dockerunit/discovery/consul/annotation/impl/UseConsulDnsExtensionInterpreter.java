@@ -11,7 +11,7 @@ import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 public class UseConsulDnsExtensionInterpreter implements ExtensionInterpreter<UseConsulDns> {
 
     @Override
-    public CreateContainerCmd build(ServiceDescriptor td, CreateContainerCmd cmd, UseConsulDns t) {
+    public CreateContainerCmd build(ServiceDescriptor sd, CreateContainerCmd cmd, UseConsulDns t) {
         return cmd.withDns(System.getProperty(DOCKER_BRIDGE_IP_PROPERTY, DOCKER_BRIDGE_IP_DEFAULT));
     }
 
