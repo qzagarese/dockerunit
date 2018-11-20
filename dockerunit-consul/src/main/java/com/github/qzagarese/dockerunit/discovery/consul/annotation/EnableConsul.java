@@ -51,7 +51,7 @@ public @interface EnableConsul {
 	/**
 	 * The initial status for the Consul check associated to this service. Default is PASSING.
 	 * 
-	 * @return
+	 * @return the status of the check
 	 */
 	CheckStatus checkInitialStatus() default CheckStatus.PASSING;
 
