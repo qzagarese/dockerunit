@@ -37,11 +37,11 @@ public interface ExtensionInterpreter<T extends Annotation> {
 	/**
 	 * Updates the {@linkplain CreateContainerCmd} instance to reflect the value of the interpreted annotation.
 	 * 
-	 * @param td the whole configuration for this test including values from other annotations.
+	 * @param sd the whole configuration for this test including values from other annotations.
 	 * @param cmd the docker-java command that will instantiate the Docker container based on Dockerunit config
 	 * @param t the annotation that is interpreted by this class
 	 * @return the updated {@linkplain CreateContainerCmd} instance
 	 */
-    CreateContainerCmd build(ServiceDescriptor td, CreateContainerCmd cmd, T t);
+    CreateContainerCmd build(ServiceDescriptor sd, CreateContainerCmd cmd, T t);
     
 }
