@@ -6,12 +6,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import com.github.qzagarese.dockerunit.NetworkContext;
 import com.github.qzagarese.dockerunit.Service;
 import com.github.qzagarese.dockerunit.ServiceContext;
 import com.github.qzagarese.dockerunit.ServiceInstance;
 import com.github.qzagarese.dockerunit.ServiceInstance.Status;
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProvider;
+import com.github.qzagarese.dockerunit.internal.NetworkContextBuider;
 import com.github.qzagarese.dockerunit.internal.ServiceContextBuilder;
+import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 import com.github.qzagarese.dockerunit.internal.UsageDescriptor;
 import com.github.qzagarese.dockerunit.internal.service.DefaultServiceContext;
 
@@ -21,15 +24,24 @@ import lombok.RequiredArgsConstructor;
 public class DockerUnitSetup {
 
 	private static final Logger logger = Logger.getLogger(DockerUnitSetup.class.getSimpleName());
-	
-	private final ServiceContextBuilder contextBuilder;
+
+	private final NetworkContextBuider networkContextBuider;
+	private final ServiceContextBuilder serviceContextBuilder;
 	private final DiscoveryProvider discoveryProvider;
 
-	public ServiceContext setup(UsageDescriptor descriptor) {
+
+    public NetworkContext setupNetworks(UsageDescriptor descriptor) {
+        // TODO introduce network creation logic here.
+        return null;
+    }
+
+	public ServiceContext setupServices(UsageDescriptor descriptor) {
 		// Create containers and perform discovery one service at the time
 		final AtomicBoolean failureOccured = new AtomicBoolean(false);
         List<ServiceContext> serviceContexts = descriptor.getDependencies().stream()
-            .map(contextBuilder::buildServiceContext)
+            .filter(rd -> rd instanceof ServiceDescriptor)
+            .map(rd -> (ServiceDescriptor) rd)
+            .map(serviceContextBuilder::buildServiceContext)
             .map(ctx -> {
                 if (!ctx.checkStatus(Status.STARTED)) {
                 	failureOccured.set(true);

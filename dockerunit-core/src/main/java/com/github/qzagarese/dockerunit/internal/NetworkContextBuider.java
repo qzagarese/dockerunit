@@ -7,8 +7,6 @@ public interface NetworkContextBuider {
 
     NetworkContext buildContext(UsageDescriptor descriptor);
 
-    NetworkContext buildNetworkContext(NetworkDescriptor descriptor);
-
     NetworkContext clearContext(NetworkContext context);
 
 

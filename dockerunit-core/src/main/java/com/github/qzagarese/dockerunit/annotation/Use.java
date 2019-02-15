@@ -30,11 +30,23 @@ import java.lang.annotation.Target;
 public @interface Use {
 
 	/**
+     * @deprecated Use resource() instead.
+     *
 	 * The descriptor class that defines how to instantiate the service
-	 * 
+	 *
 	 * @return the descriptor type
 	 */
     Class<?> service();
+
+
+    /**
+     *
+     * The descriptor class that defines how to instantiate the resource
+     *
+     * @return the descriptor type
+     */
+    Class<?> resource();
+
     
     /**
      * A prefix that will be used to give names to the containers instantiated

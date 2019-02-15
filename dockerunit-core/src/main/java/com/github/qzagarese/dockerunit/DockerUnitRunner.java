@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.logging.Logger;
 
+import com.github.qzagarese.dockerunit.internal.*;
 import org.junit.Test;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
@@ -16,9 +17,6 @@ import org.junit.runners.model.Statement;
 
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProvider;
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProviderFactory;
-import com.github.qzagarese.dockerunit.internal.UsageDescriptor;
-import com.github.qzagarese.dockerunit.internal.ServiceContextBuilder;
-import com.github.qzagarese.dockerunit.internal.ServiceContextBuilderFactory;
 import com.github.qzagarese.dockerunit.internal.lifecycle.InvokeDockerUnitMethod;
 import com.github.qzagarese.dockerunit.internal.lifecycle.DockerUnitAfter;
 import com.github.qzagarese.dockerunit.internal.lifecycle.DockerUnitAfterClass;
@@ -40,10 +38,13 @@ import com.github.qzagarese.dockerunit.internal.reflect.DependencyDescriptorBuil
 public class DockerUnitRunner extends BlockJUnit4ClassRunner {
 
 	private final Map<FrameworkMethod, ServiceContext> methodsContexts = new HashMap<>();
+	private final Map<FrameworkMethod, NetworkContext> methodsNetworkContexts = new HashMap<>();
 	private ServiceContext classContext;
+	private NetworkContext classNetworkContext;
 	private ServiceContext discoveryContext;
 	private final UsageDescriptorBuilder descriptorBuilder = DependencyDescriptorBuilderFactory.create();
-	private final ServiceContextBuilder contextBuilder = ServiceContextBuilderFactory.create();
+	private final ServiceContextBuilder serviceContextBuilder = ServiceContextBuilderFactory.create();
+	private final NetworkContextBuider networkContextBuilder = NetworkContextBuilderFactory.create();
 	private final DiscoveryProvider discoveryProvider;
 	
 	private static final Logger logger = Logger.getLogger(DockerUnitRunner.class.getSimpleName());
@@ -76,13 +77,13 @@ public class DockerUnitRunner extends BlockJUnit4ClassRunner {
 
 	@Override
 	protected Statement withAfters(FrameworkMethod method, Object target, Statement statement) {
-		Statement next = new DockerUnitAfter(method, this, statement, discoveryProvider, contextBuilder);
+		Statement next = new DockerUnitAfter(method, this, statement, discoveryProvider, serviceContextBuilder);
 		return super.withAfters(method, target, next);
 	}
 	
 	@Override
 	protected Statement withAfterClasses(Statement statement) {
-		Statement next = new DockerUnitAfterClass(this, statement, discoveryProvider, contextBuilder);
+		Statement next = new DockerUnitAfterClass(this, statement, discoveryProvider, serviceContextBuilder);
 		return super.withAfterClasses(next);
 	}
 	
@@ -92,7 +93,7 @@ public class DockerUnitRunner extends BlockJUnit4ClassRunner {
 		Statement next = super.withBeforeClasses(statement);
 		UsageDescriptor descriptor = descriptorBuilder.buildDescriptor(getTestClass().getJavaClass());
 		UsageDescriptor discoveryProviderDescriptor = descriptorBuilder.buildDescriptor(discoveryProvider.getDiscoveryConfig());
-		return new DockerUnitBeforeClass(this, next, discoveryProvider, contextBuilder, descriptor, discoveryProviderDescriptor);
+		return new DockerUnitBeforeClass(this, next, discoveryProvider, serviceContextBuilder, networkContextBuilder, descriptor, discoveryProviderDescriptor);
 	}
 
 
@@ -100,7 +101,7 @@ public class DockerUnitRunner extends BlockJUnit4ClassRunner {
 	protected Statement withBefores(FrameworkMethod method, Object target, Statement statement) {
 		Statement next =  super.withBefores(method, target, statement);
 		UsageDescriptor descriptor = descriptorBuilder.buildDescriptor(method);
-		return new DockerUnitBefore(method, this, next, discoveryProvider, contextBuilder, descriptor);
+		return new DockerUnitBefore(method, this, next, discoveryProvider, serviceContextBuilder, networkContextBuilder, descriptor);
 	}
 	
 	
@@ -147,4 +148,15 @@ public class DockerUnitRunner extends BlockJUnit4ClassRunner {
 		this.discoveryContext = discoveryContext;
 	}
 
+	public void setClassNetworkContext(NetworkContext networkContext) {
+    	this.classNetworkContext = networkContext;
+	}
+
+    public void setNetworkContext(FrameworkMethod method, NetworkContext methodLevelNetworkContext) {
+    	methodsNetworkContexts.put(method, methodLevelNetworkContext);
+    }
+
+	public NetworkContext getNetworkContext(FrameworkMethod method) {
+    	return methodsNetworkContexts.get(method);
+	}
 }

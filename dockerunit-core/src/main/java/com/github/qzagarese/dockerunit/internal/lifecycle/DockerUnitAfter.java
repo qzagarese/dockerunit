@@ -1,5 +1,6 @@
 package com.github.qzagarese.dockerunit.internal.lifecycle;
 
+import com.github.qzagarese.dockerunit.NetworkContext;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 
@@ -24,6 +25,7 @@ public class DockerUnitAfter extends Statement {
 		try {
 			statement.evaluate();
 		} finally {
+			NetworkContext networkContext = runner.getNetworkContext(method);
 			ServiceContext context = runner.getContext(method);
 			if(context != null) {
 				context = context.subtract(runner.getClassContext());

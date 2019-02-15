@@ -22,16 +22,19 @@ public class DockerUnitRule implements TestRule {
 
     private static final Logger logger = Logger.getLogger(DockerUnitRule.class.getSimpleName());
 
-    private static final Map<String, ServiceContext> activeContexts = new HashMap<>();
+    private static final Map<String, ServiceContext> ACTIVE_SERVICE_CONTEXTS = new HashMap<>();
+    private static final Map<String, NetworkContext> ACTIVE_NETWORK_CONTEXTS = new HashMap<>();
 
     private final UsageDescriptorBuilder descriptorBuilder = DependencyDescriptorBuilderFactory.create();
     private final ServiceContextBuilder serviceContextBuilder = ServiceContextBuilderFactory.create();
     private final NetworkContextBuider networkContextBuilder  = NetworkContextBuilderFactory.create();
     private final DiscoveryProvider discoveryProvider;
     private final String serviceContextName;
+    private final String networkContextName;
     private ServiceContext discoveryContext;
     
-    private static final String GLOBAL_CONTEXT_NAME = "dockerunit_global_context";    
+    private static final String GLOBAL_CONTEXT_NAME = "dockerunit_global_context";
+
 
     /**
      * Returns the {@link ServiceContext} that has been associated to the instance of {@link DockerUnitRule} that
@@ -41,7 +44,7 @@ public class DockerUnitRule implements TestRule {
      * @return the associated {@link ServiceContext}
      */
     public static ServiceContext getServiceContext(String serviceContextName) {
-        return Optional.ofNullable(activeContexts.get(serviceContextName))
+        return Optional.ofNullable(ACTIVE_SERVICE_CONTEXTS.get(serviceContextName))
                 .orElseThrow(() -> new ConfigException("No active context for name " + serviceContextName 
                         + " . Please make sure that you are using the context name that you have passed to the "
                         + DockerUnitRule.class.getSimpleName() 
@@ -55,9 +58,9 @@ public class DockerUnitRule implements TestRule {
      * @return the default{@link ServiceContext}
      */
     public static ServiceContext getDefaultServiceContext() {
-        return Optional.ofNullable(activeContexts.get(GLOBAL_CONTEXT_NAME))
+        return Optional.ofNullable(ACTIVE_SERVICE_CONTEXTS.get(GLOBAL_CONTEXT_NAME))
                 .orElse(
-                        activeContexts.values().stream().findAny()
+                        ACTIVE_SERVICE_CONTEXTS.values().stream().findAny()
                                 .orElseThrow(() -> new ConfigException("No active context detected. "
                                     + "Please make sure that you have declared at least one @"
                                     + Use.class.getSimpleName()
@@ -71,8 +74,12 @@ public class DockerUnitRule implements TestRule {
     }
     
     public DockerUnitRule(String serviceContextName) {
+        this(serviceContextName, GLOBAL_CONTEXT_NAME);
+    }
+
+    public DockerUnitRule(String serviceContextName, String networkContextName) {
         ServiceLoader<DiscoveryProviderFactory> loader = ServiceLoader.load(DiscoveryProviderFactory.class);
-       
+
         this.discoveryProvider = StreamSupport.stream(loader.spliterator(), false)
                 .peek(impl -> logger.info("Found discovery provider factory of type " + impl.getClass().getSimpleName()))
                 .findFirst()
@@ -82,8 +89,9 @@ public class DockerUnitRule implements TestRule {
                 })
                 .map(DiscoveryProviderFactory::getProvider)
                 .orElseThrow(() -> new RuntimeException("No discovery provider factory found. Aborting test."));
-        
+
         this.serviceContextName = serviceContextName;
+        this.networkContextName = networkContextName;
     }
 
     @Override
@@ -114,22 +122,30 @@ public class DockerUnitRule implements TestRule {
         if (!discoveryContext.checkStatus(Status.STARTED)) {
             throw new RuntimeException(discoveryContext.getFormattedErrors());
         }
+
+        DockerUnitSetup dockerUnitSetup = new DockerUnitSetup(networkContextBuilder, serviceContextBuilder, discoveryProvider);
+        NetworkContext networkContext = dockerUnitSetup.setupNetworks(descriptor);
+        ServiceContext serviceContext = dockerUnitSetup.setupServices(descriptor);
         
-        ServiceContext completeContext = new DockerUnitSetup(serviceContextBuilder, discoveryProvider).setup(descriptor);
-        
-        activeContexts.put(this.serviceContextName, completeContext);
-        if (!completeContext.checkStatus(Status.DISCOVERED)) {
-            throw new RuntimeException(completeContext.getFormattedErrors());
+        ACTIVE_SERVICE_CONTEXTS.put(this.serviceContextName, serviceContext);
+        ACTIVE_NETWORK_CONTEXTS.put(this.networkContextName, networkContext);
+        if (!serviceContext.checkStatus(Status.DISCOVERED)) {
+            throw new RuntimeException(serviceContext.getFormattedErrors());
         }
         
     }
 
 	
     private void doTeardown() {
-        ServiceContext context = activeContexts.get(this.serviceContextName);
-        if (context != null) {
-            ServiceContext cleared = serviceContextBuilder.clearContext(context);
+        ServiceContext serviceContext = ACTIVE_SERVICE_CONTEXTS.get(this.serviceContextName);
+        if (serviceContext != null) {
+            ServiceContext cleared = serviceContextBuilder.clearContext(serviceContext);
             discoveryProvider.clearRegistry(cleared, new DefaultServiceContext(new HashSet<>()));
+        }
+
+        NetworkContext networkContext = ACTIVE_NETWORK_CONTEXTS.get(this.networkContextName);
+        if(networkContext != null) {
+            networkContextBuilder.clearContext(networkContext);
         }
         
         if (this.discoveryContext != null) {

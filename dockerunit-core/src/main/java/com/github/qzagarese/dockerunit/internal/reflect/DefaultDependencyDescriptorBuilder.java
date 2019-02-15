@@ -46,31 +46,33 @@ public class DefaultDependencyDescriptorBuilder implements UsageDescriptorBuilde
     }
 
     private ResourceDescriptor buildDescriptor(Use use) {
-        if (isNetworkDescriptor(use.service()) {
-            return buildNetworkDescriptor(use);
+        Class<?> resourceType = (use.resource() != null) ? use.resource() : use.service();
+        if (isNetworkDescriptor(resourceType)) {
+            return buildNetworkDescriptor(use, resourceType);
         }
-        return buildServiceDescriptor(use);
+        return buildServiceDescriptor(use, resourceType);
     }
 
-    private ServiceDescriptor buildServiceDescriptor(Use use) {
-        Object resourceInstance = instantiateResourceClass(use.service());
+    private ServiceDescriptor buildServiceDescriptor(Use use, Class<?> resourceType) {
+        Object resourceInstance = instantiateResourceClass(resourceType);
         return DefaultServiceDescriptor.builder()
                 .instance(resourceInstance)
-                .named(findNamed(use.service()))
+                .named(findNamed(resourceType))
                 .customisationHook(findCustomisationHook(use, CreateContainerCmd.class))
-                .options(extractOptions(use.service()))
+                .options(extractOptions(resourceType))
                 .order(use.order())
                 .replicas(extractReplicas(use))
                 .containerName(use.containerPrefix())
-                .image(findImage(use.service()))
+                .image(findImage(resourceType))
                 .build();
     }
 
-    private NetworkDescriptor buildNetworkDescriptor(Use use) {
-        Object resourceInstance = instantiateResourceClass(use.service());
+    private NetworkDescriptor buildNetworkDescriptor(Use use, Class<?> resourceType) {
+        Object resourceInstance = instantiateResourceClass(resourceType);
         return DefaultNetworkDescriptor.builder()
                 .instance(resourceInstance)
-                .named(findNamed(use.service()))
+                .named(findNamed(resourceType))
+                .networkDefinition(findNetworkDefinition(resourceType))
                 .order(use.order())
                 .customisationHook(findCustomisationHook(use, CreateNetworkCmd.class))
                 .build();
@@ -81,7 +83,7 @@ public class DefaultDependencyDescriptorBuilder implements UsageDescriptorBuilde
         try {
             return clazz.newInstance();
         } catch (Exception e) {
-            throw new RuntimeException("Cannot instantiate resource class " + use.service().getName());
+            throw new RuntimeException("Cannot instantiate resource class " + clazz.getName());
         }
     }
 
@@ -182,6 +184,10 @@ public class DefaultDependencyDescriptorBuilder implements UsageDescriptorBuilde
 
     private Named findNamed(Class<?> service) {
     	return findRequiredAnnotation(service, Named.class);
+    }
+
+    private NetworkDefinition findNetworkDefinition(Class<?> resourceType) {
+        return findRequiredAnnotation(resourceType, NetworkDefinition.class);
     }
     
     private List<Use> getDependencies(AnnotatedElement element) {

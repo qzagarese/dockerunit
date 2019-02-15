@@ -13,11 +13,6 @@ public class DefaultNetworkContextBuilder implements NetworkContextBuider {
     }
 
     @Override
-    public NetworkContext buildNetworkContext(NetworkDescriptor descriptor) {
-        return null;
-    }
-
-    @Override
     public NetworkContext clearContext(NetworkContext context) {
         return null;
     }

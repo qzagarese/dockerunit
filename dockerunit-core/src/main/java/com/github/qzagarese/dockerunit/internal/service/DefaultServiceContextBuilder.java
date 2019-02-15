@@ -22,6 +22,8 @@ public class DefaultServiceContextBuilder implements ServiceContextBuilder {
     @Override
     public ServiceContext buildContext(UsageDescriptor descriptor) {
     	return new DefaultServiceContext(descriptor.getDependencies().stream()
+                .filter(rd -> rd instanceof ServiceDescriptor)
+                .map(rd -> (ServiceDescriptor) rd)
                 .map(d -> serviceBuilder.build(d, client))
                 .collect(Collectors.toSet()));
     }
