@@ -7,22 +7,16 @@ import java.util.List;
 import com.github.qzagarese.dockerunit.annotation.Image;
 import com.github.qzagarese.dockerunit.annotation.Named;
 
-public interface ServiceDescriptor {
+public interface ServiceDescriptor extends  ResourceDescriptor {
 
     Image getImage();
     
-    Named getNamed();
-    
     List<? extends Annotation> getOptions();
-    
-    Method getCustomisationHook();
-    
-    Object getInstance();
-    
+
     String getContainerName();
     
     int getReplicas();
     
     int getOrder();
-    
+
 }

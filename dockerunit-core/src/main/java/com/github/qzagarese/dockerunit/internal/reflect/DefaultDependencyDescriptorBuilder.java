@@ -1,5 +1,12 @@
 package com.github.qzagarese.dockerunit.internal.reflect;
 
+import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.github.dockerjava.api.command.CreateNetworkCmd;
+import com.github.qzagarese.dockerunit.annotation.*;
+import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
+import com.github.qzagarese.dockerunit.internal.UsageDescriptor;
+import org.junit.runners.model.FrameworkMethod;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
@@ -9,19 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import org.junit.runners.model.FrameworkMethod;
-
-import com.github.dockerjava.api.command.CreateContainerCmd;
-import com.github.qzagarese.dockerunit.annotation.ContainerBuilder;
-import com.github.qzagarese.dockerunit.annotation.Usages;
-import com.github.qzagarese.dockerunit.annotation.ExtensionMarker;
-import com.github.qzagarese.dockerunit.annotation.Image;
-import com.github.qzagarese.dockerunit.annotation.Named;
-import com.github.qzagarese.dockerunit.annotation.Use;
-import com.github.qzagarese.dockerunit.internal.UsageDescriptor;
-import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
-import com.github.qzagarese.dockerunit.internal.reflect.DefaultTestDescriptor.DefaultTestDescriptorBuilder;
 
 public class DefaultDependencyDescriptorBuilder implements UsageDescriptorBuilder {
 
@@ -50,7 +44,7 @@ public class DefaultDependencyDescriptorBuilder implements UsageDescriptorBuilde
     }
 
     private ServiceDescriptor buildDescriptor(Use use) {
-        DefaultTestDescriptorBuilder builder = DefaultTestDescriptor.builder();
+        DefaultServiceDescriptor.DefaultServiceDescriptorBuilder builder = DefaultServiceDescriptor.builder();
         
         checkServiceClass(use.service());
         try {
@@ -58,14 +52,26 @@ public class DefaultDependencyDescriptorBuilder implements UsageDescriptorBuilde
         } catch (Exception e) {
             throw new RuntimeException("Cannot instantiate service class " + use.service().getName());
         }
-        builder.replicas(extractReplicas(use))
-        	.order(use.order())
-        	.containerName(use.containerPrefix())
-        	.image(findImage(use.service()))
-        	.named(findNamed(use.service()))
-        	.customisationHook(findCustomisationHook(use))
-        	.options(extractOptions(use.service()));
-        return builder.build();
+
+        builder.descriptorType(isNetworkDescriptor(use.service()) ? ServiceDescriptor.DescriptorType.NETWORK : ServiceDescriptor.DescriptorType.SERVICE);
+
+        final DefaultServiceDescriptor draft = builder.order(use.order())
+                .named(findNamed(use.service()))
+                .build();
+
+        if(draft.getDescriptorType().equals(ServiceDescriptor.DescriptorType.NETWORK)) {
+            return draft.withCustomisationHook(findCustomisationHook(use, CreateNetworkCmd.class));
+        }
+
+        return draft.withOptions(extractOptions(use.service()))
+            .withReplicas(extractReplicas(use))
+        	.withContainerName(use.containerPrefix())
+        	.withImage(findImage(use.service()))
+        	.withCustomisationHook(findCustomisationHook(use, CreateContainerCmd.class));
+    }
+
+    private boolean isNetworkDescriptor(Class<?> service) {
+        return service.isAnnotationPresent(NetworkDefinition.class);
     }
 
     private List<? extends Annotation> extractOptions(Class<?> service) {
@@ -129,14 +135,14 @@ public class DefaultDependencyDescriptorBuilder implements UsageDescriptorBuilde
             .findFirst();
     }
 
-    private Method findCustomisationHook(Use use) {
+    private Method findCustomisationHook(Use use, Class<?> commandType) {
         Optional<Method> opt = Arrays.asList(use.service().getDeclaredMethods()).stream()
             .filter(m -> m.isAnnotationPresent(ContainerBuilder.class)
                 && Modifier.isPublic(m.getModifiers())
                 && !Modifier.isStatic(m.getModifiers())
                 && m.getParameterCount() == 1 
-                && m.getParameterTypes()[0].equals(CreateContainerCmd.class)
-                && m.getReturnType().equals(CreateContainerCmd.class))
+                && m.getParameterTypes()[0].equals(commandType)
+                && m.getReturnType().equals(commandType))
             .findFirst();
         return opt.orElseGet(() -> null);
     }

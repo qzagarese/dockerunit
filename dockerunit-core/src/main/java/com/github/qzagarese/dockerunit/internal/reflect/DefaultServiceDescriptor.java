@@ -10,10 +10,12 @@ import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.experimental.Wither;
 
 @Getter
 @Builder
-public class DefaultTestDescriptor implements ServiceDescriptor {
+@Wither
+public class DefaultServiceDescriptor implements ServiceDescriptor {
 
     private Image image;
     private Named named;
@@ -23,5 +25,6 @@ public class DefaultTestDescriptor implements ServiceDescriptor {
     private int order;
     private String containerName;
     private Object instance;
-    
+    private DescriptorType descriptorType = DescriptorType.SERVICE;
+
 }

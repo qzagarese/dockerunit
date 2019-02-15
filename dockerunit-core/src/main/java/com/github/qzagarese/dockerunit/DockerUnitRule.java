@@ -1,29 +1,22 @@
 package com.github.qzagarese.dockerunit;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ServiceLoader;
-import java.util.logging.Logger;
-import java.util.stream.StreamSupport;
-
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
-
 import com.github.qzagarese.dockerunit.ServiceInstance.Status;
 import com.github.qzagarese.dockerunit.annotation.Use;
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProvider;
 import com.github.qzagarese.dockerunit.discovery.DiscoveryProviderFactory;
 import com.github.qzagarese.dockerunit.exception.ConfigException;
-import com.github.qzagarese.dockerunit.internal.ServiceContextBuilder;
-import com.github.qzagarese.dockerunit.internal.ServiceContextBuilderFactory;
-import com.github.qzagarese.dockerunit.internal.UsageDescriptor;
+import com.github.qzagarese.dockerunit.internal.*;
 import com.github.qzagarese.dockerunit.internal.lifecycle.DockerUnitSetup;
 import com.github.qzagarese.dockerunit.internal.reflect.DependencyDescriptorBuilderFactory;
 import com.github.qzagarese.dockerunit.internal.reflect.UsageDescriptorBuilder;
 import com.github.qzagarese.dockerunit.internal.service.DefaultServiceContext;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
+
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.stream.StreamSupport;
 
 public class DockerUnitRule implements TestRule {
 
@@ -32,7 +25,8 @@ public class DockerUnitRule implements TestRule {
     private static final Map<String, ServiceContext> activeContexts = new HashMap<>();
 
     private final UsageDescriptorBuilder descriptorBuilder = DependencyDescriptorBuilderFactory.create();
-    private final ServiceContextBuilder contextBuilder = ServiceContextBuilderFactory.create();
+    private final ServiceContextBuilder serviceContextBuilder = ServiceContextBuilderFactory.create();
+    private final NetworkContextBuider networkContextBuilder  = NetworkContextBuilderFactory.create();
     private final DiscoveryProvider discoveryProvider;
     private final String serviceContextName;
     private ServiceContext discoveryContext;
@@ -116,12 +110,12 @@ public class DockerUnitRule implements TestRule {
         UsageDescriptor discoveryProviderDescriptor = descriptorBuilder.buildDescriptor(discoveryProvider.getDiscoveryConfig());
       
         // Build discovery context
-        this.discoveryContext = contextBuilder.buildContext(discoveryProviderDescriptor);
+        this.discoveryContext = serviceContextBuilder.buildContext(discoveryProviderDescriptor);
         if (!discoveryContext.checkStatus(Status.STARTED)) {
             throw new RuntimeException(discoveryContext.getFormattedErrors());
         }
         
-        ServiceContext completeContext = new DockerUnitSetup(contextBuilder, discoveryProvider).setup(descriptor);
+        ServiceContext completeContext = new DockerUnitSetup(serviceContextBuilder, discoveryProvider).setup(descriptor);
         
         activeContexts.put(this.serviceContextName, completeContext);
         if (!completeContext.checkStatus(Status.DISCOVERED)) {
@@ -134,12 +128,12 @@ public class DockerUnitRule implements TestRule {
     private void doTeardown() {
         ServiceContext context = activeContexts.get(this.serviceContextName);
         if (context != null) {
-            ServiceContext cleared = contextBuilder.clearContext(context);
+            ServiceContext cleared = serviceContextBuilder.clearContext(context);
             discoveryProvider.clearRegistry(cleared, new DefaultServiceContext(new HashSet<>()));
         }
         
-        if (this.discoveryContext != null) {  
-            contextBuilder.clearContext(discoveryContext);
+        if (this.discoveryContext != null) {
+            serviceContextBuilder.clearContext(discoveryContext);
         }
     }
 
