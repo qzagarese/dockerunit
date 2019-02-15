@@ -109,7 +109,7 @@ public class DockerUnitRule implements TestRule {
         UsageDescriptor descriptor = descriptorBuilder.buildDescriptor(description.getTestClass());
         UsageDescriptor discoveryProviderDescriptor = descriptorBuilder.buildDescriptor(discoveryProvider.getDiscoveryConfig());
       
-        // Build discovery context
+        // Build service discovery context
         this.discoveryContext = serviceContextBuilder.buildContext(discoveryProviderDescriptor);
         if (!discoveryContext.checkStatus(Status.STARTED)) {
             throw new RuntimeException(discoveryContext.getFormattedErrors());

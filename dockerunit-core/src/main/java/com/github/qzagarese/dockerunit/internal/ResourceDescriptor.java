@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 
 public interface ResourceDescriptor {
 
+    int getOrder();
 
     Named getNamed();
 

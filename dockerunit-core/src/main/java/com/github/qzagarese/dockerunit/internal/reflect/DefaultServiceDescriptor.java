@@ -14,7 +14,6 @@ import lombok.experimental.Wither;
 
 @Getter
 @Builder
-@Wither
 public class DefaultServiceDescriptor implements ServiceDescriptor {
 
     private Image image;
@@ -25,6 +24,5 @@ public class DefaultServiceDescriptor implements ServiceDescriptor {
     private int order;
     private String containerName;
     private Object instance;
-    private DescriptorType descriptorType = DescriptorType.SERVICE;
 
 }

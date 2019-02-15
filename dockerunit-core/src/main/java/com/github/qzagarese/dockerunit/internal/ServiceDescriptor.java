@@ -16,7 +16,5 @@ public interface ServiceDescriptor extends  ResourceDescriptor {
     String getContainerName();
     
     int getReplicas();
-    
-    int getOrder();
 
 }

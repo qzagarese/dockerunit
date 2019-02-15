@@ -1,18 +1,17 @@
 package com.github.qzagarese.dockerunit.internal.reflect;
 
-import java.util.List;
-
+import com.github.qzagarese.dockerunit.internal.ResourceDescriptor;
 import com.github.qzagarese.dockerunit.internal.UsageDescriptor;
-import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
-
 import lombok.AllArgsConstructor;
+
+import java.util.List;
 
 @AllArgsConstructor
 public class DefaultDependencyDescriptor implements UsageDescriptor {
 
-	private List<ServiceDescriptor> dependencies;
+	private List<ResourceDescriptor> dependencies;
 	
-	public List<ServiceDescriptor> getDependencies() {
+	public List<ResourceDescriptor> getDependencies() {
 		dependencies.sort((d1, d2) -> d1.getOrder() - d2.getOrder());
 		return dependencies;
 	}

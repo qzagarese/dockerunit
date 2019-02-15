@@ -3,6 +3,8 @@ package com.github.qzagarese.dockerunit.internal.reflect;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateNetworkCmd;
 import com.github.qzagarese.dockerunit.annotation.*;
+import com.github.qzagarese.dockerunit.internal.NetworkDescriptor;
+import com.github.qzagarese.dockerunit.internal.ResourceDescriptor;
 import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 import com.github.qzagarese.dockerunit.internal.UsageDescriptor;
 import org.junit.runners.model.FrameworkMethod;
@@ -32,42 +34,55 @@ public class DefaultDependencyDescriptorBuilder implements UsageDescriptorBuilde
     
     private UsageDescriptor buildDescriptor(AnnotatedElement element) {
     	List<Use> requirements = getDependencies(element);
-        List<ServiceDescriptor> descriptors = asDescriptors(requirements);
+        List<ResourceDescriptor> descriptors = asDescriptors(requirements);
         return new DefaultDependencyDescriptor(descriptors);
     }
     
-    private List<ServiceDescriptor> asDescriptors(List<Use> requirements) {
-        List<ServiceDescriptor> descriptors = requirements.stream()
+    private List<ResourceDescriptor> asDescriptors(List<Use> requirements) {
+        List<ResourceDescriptor> descriptors = requirements.stream()
             .map(use -> buildDescriptor(use))
             .collect(Collectors.toList());
         return descriptors;
     }
 
-    private ServiceDescriptor buildDescriptor(Use use) {
-        DefaultServiceDescriptor.DefaultServiceDescriptorBuilder builder = DefaultServiceDescriptor.builder();
-        
-        checkServiceClass(use.service());
-        try {
-            builder.instance(use.service().newInstance());
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot instantiate service class " + use.service().getName());
+    private ResourceDescriptor buildDescriptor(Use use) {
+        if (isNetworkDescriptor(use.service()) {
+            return buildNetworkDescriptor(use);
         }
+        return buildServiceDescriptor(use);
+    }
 
-        builder.descriptorType(isNetworkDescriptor(use.service()) ? ServiceDescriptor.DescriptorType.NETWORK : ServiceDescriptor.DescriptorType.SERVICE);
-
-        final DefaultServiceDescriptor draft = builder.order(use.order())
+    private ServiceDescriptor buildServiceDescriptor(Use use) {
+        Object resourceInstance = instantiateResourceClass(use.service());
+        return DefaultServiceDescriptor.builder()
+                .instance(resourceInstance)
                 .named(findNamed(use.service()))
+                .customisationHook(findCustomisationHook(use, CreateContainerCmd.class))
+                .options(extractOptions(use.service()))
+                .order(use.order())
+                .replicas(extractReplicas(use))
+                .containerName(use.containerPrefix())
+                .image(findImage(use.service()))
                 .build();
+    }
 
-        if(draft.getDescriptorType().equals(ServiceDescriptor.DescriptorType.NETWORK)) {
-            return draft.withCustomisationHook(findCustomisationHook(use, CreateNetworkCmd.class));
+    private NetworkDescriptor buildNetworkDescriptor(Use use) {
+        Object resourceInstance = instantiateResourceClass(use.service());
+        return DefaultNetworkDescriptor.builder()
+                .instance(resourceInstance)
+                .named(findNamed(use.service()))
+                .order(use.order())
+                .customisationHook(findCustomisationHook(use, CreateNetworkCmd.class))
+                .build();
+    }
+
+    private Object instantiateResourceClass(Class<?> clazz) {
+        checkResourceClass(clazz);
+        try {
+            return clazz.newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot instantiate resource class " + use.service().getName());
         }
-
-        return draft.withOptions(extractOptions(use.service()))
-            .withReplicas(extractReplicas(use))
-        	.withContainerName(use.containerPrefix())
-        	.withImage(findImage(use.service()))
-        	.withCustomisationHook(findCustomisationHook(use, CreateContainerCmd.class));
     }
 
     private boolean isNetworkDescriptor(Class<?> service) {
@@ -80,7 +95,7 @@ public class DefaultDependencyDescriptorBuilder implements UsageDescriptorBuilde
             .collect(Collectors.toList());
     }
 
-    private void checkServiceClass(Class<?> service) {
+    private void checkResourceClass(Class<?> service) {
     	String className = service.getSimpleName();
         StringBuffer buffer = new StringBuffer();
         if(service.isInterface()) {
