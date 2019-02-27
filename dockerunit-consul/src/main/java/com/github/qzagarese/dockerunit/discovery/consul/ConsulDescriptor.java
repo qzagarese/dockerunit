@@ -12,6 +12,7 @@ import com.github.qzagarese.dockerunit.discovery.consul.annotation.UseConsulDns;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.*;
@@ -30,9 +31,7 @@ public class ConsulDescriptor {
     @ContainerBuilder
 	public CreateContainerCmd setup(CreateContainerCmd cmd) {
 		List<ExposedPort> ports = new ArrayList<>(Arrays.asList(cmd.getExposedPorts()));
-        ExposedPort dnsPort = ExposedPort.udp(CONSUL_DNS_PORT);
-        ports.add(dnsPort);
-        
+
         ExposedPort consulPort = ExposedPort.tcp(CONSUL_PORT);
         ports.add(consulPort);
         
@@ -41,15 +40,10 @@ public class ConsulDescriptor {
             bindings = new Ports();
         }
         
-        String consulDnsFlagOff = System.getProperty(CONSUL_DNS_OFF_PROPERTY, CONSUL_DNS_OFF_DEFAULT);
+        Optional<String> disableDnsFlag = Optional.ofNullable(System.getProperty(CONSUL_DNS_OFF_PROPERTY, CONSUL_DNS_OFF_DEFAULT));
 
-        if(consulDnsFlagOff == null) {
-            int dnsBridgePort = Integer.parseInt(System.getProperty(CONSUL_DNS_PORT_BRIDGE_BINDING,
-                    CONSUL_DNS_PORT_BRIDGE_BINDING_DEFAULT));
-
-            bindings.bind(dnsPort, Binding.bindIpAndPort(
-                    System.getProperty(DOCKER_BRIDGE_IP_PROPERTY, DOCKER_BRIDGE_IP_DEFAULT),
-                    dnsBridgePort));
+        if(!disableDnsFlag.isPresent()) {
+            activateDns(ports, bindings);
         } else {
             logger.warning("Consul dns has been disabled. Usages of @" + UseConsulDns.class.getSimpleName() + " will not sort any effect.");
         }
@@ -61,5 +55,17 @@ public class ConsulDescriptor {
             .withCmd("agent", "-dev", "-client=0.0.0.0", "-enable-script-checks");
 
 	}
-	
+
+    private void activateDns(List<ExposedPort> ports, Ports bindings) {
+        ExposedPort dnsPort = ExposedPort.udp(CONSUL_DNS_PORT);
+        ports.add(dnsPort);
+        
+        int dnsBridgePort = Integer.parseInt(System.getProperty(CONSUL_DNS_PORT_BRIDGE_BINDING,
+                CONSUL_DNS_PORT_BRIDGE_BINDING_DEFAULT));
+
+        bindings.bind(dnsPort, Binding.bindIpAndPort(
+                System.getProperty(DOCKER_BRIDGE_IP_PROPERTY, DOCKER_BRIDGE_IP_DEFAULT),
+                dnsBridgePort));
+    }
+
 }
