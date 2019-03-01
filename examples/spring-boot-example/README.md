@@ -31,6 +31,6 @@ If you are on Linux but you have a different ip (for example `172.17.0.1`), run 
 
 If you are on Mac, run the following:
 
-`./mvnw test -P container-tests -Ddocker.host=localhost -Ddocker.bridge.ip=172.17.0.1 -Dconsul.dns.off` 
+`./mvnw test -P container-tests -Ddocker.host=localhost -Ddocker.bridge.ip=172.17.0.1 -Dconsul.dns.enabled=false` 
 
    
