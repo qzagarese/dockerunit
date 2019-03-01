@@ -15,6 +15,7 @@ public class ConsulDiscoveryConfig {
 	public static final String CONSUL_POLLING_PERIOD_DEFAULT = "1";
 	public static final String CONSUL_DNS_PORT_BRIDGE_BINDING = "consul.dns.port.bridge.binding";
 	public static final String CONSUL_DNS_PORT_BRIDGE_BINDING_DEFAULT = "53";
-	
-	
+	public static final String CONSUL_DNS_ENABLED_PROPERTY = "consul.dns.enabled";
+	public static final String CONSUL_DNS_ENABLED_DEFAULT = "true";
+
 }

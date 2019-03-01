@@ -3,7 +3,7 @@
 <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.qzagarese</groupId>
   <artifactId>dockerunit-core</artifactId>
-  <version>1.0.0-GA</version>
+  <version>1.0.1-SNAPSHOT</version>
   <name>dockerunit-core</name>
   <description>Java Framework for testing of dockerised applications and services. Core package</description>
   <url>https://github.com/qzagarese/dockerunit</url>
