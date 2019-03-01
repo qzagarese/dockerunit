@@ -40,9 +40,9 @@ public class ConsulDescriptor {
             bindings = new Ports();
         }
 
-        Optional<String> disableDnsFlag = Optional.ofNullable(System.getProperty(CONSUL_DNS_OFF_PROPERTY, CONSUL_DNS_OFF_DEFAULT));
+        boolean enableDnsFlag = Boolean.parseBoolean(System.getProperty(CONSUL_DNS_ENABLED_PROPERTY, CONSUL_DNS_ENABLED_DEFAULT));
 
-        if(!disableDnsFlag.isPresent()) {
+        if(enableDnsFlag) {
             activateDns(ports, bindings);
         } else {
             logger.warning("Consul DNS has been disabled. Usages of @" + UseConsulDns.class.getSimpleName() + " will be ignored.");
