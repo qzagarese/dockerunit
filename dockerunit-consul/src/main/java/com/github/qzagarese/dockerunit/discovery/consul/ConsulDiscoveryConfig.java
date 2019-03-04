@@ -2,7 +2,9 @@ package com.github.qzagarese.dockerunit.discovery.consul;
 
 import com.github.qzagarese.dockerunit.annotation.Use;
 
-@Use(service=ConsulDescriptor.class, containerPrefix="consul")
+import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.CONSUL_CONTAINER_NAME;
+
+@Use(service=ConsulDescriptor.class, containerPrefix=CONSUL_CONTAINER_NAME)
 @Use(service=RegistratorDescriptor.class, containerPrefix="registrator")
 public class ConsulDiscoveryConfig {
 
@@ -17,5 +19,5 @@ public class ConsulDiscoveryConfig {
 	public static final String CONSUL_DNS_PORT_BRIDGE_BINDING_DEFAULT = "53";
 	public static final String CONSUL_DNS_ENABLED_PROPERTY = "consul.dns.enabled";
 	public static final String CONSUL_DNS_ENABLED_DEFAULT = "true";
-
+	public static final String CONSUL_CONTAINER_NAME = "consul";
 }

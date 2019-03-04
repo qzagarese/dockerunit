@@ -114,12 +114,10 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 	}
 
 	private int findPort(InspectContainerResponse response, List<ServiceRecord> records) {
-		ServiceRecord record = records.stream()
+		Optional<ServiceRecord> record = records.stream()
 			.filter(r -> this.matchPort(r, response))
-			.findFirst()
-			.orElseThrow(() ->  
-				new RuntimeException("Cannot find exposed port/ip for container " + response.getName()));
-		return record.getPort();
+			.findFirst();
+		return record.isPresent() ? record.get().getPort() : records.stream().findFirst().map(sr -> sr.getPort()).orElse(0);
 	}
 
 	private boolean matchPort(ServiceRecord record, InspectContainerResponse r) {

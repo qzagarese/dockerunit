@@ -19,7 +19,7 @@ public class RegistratorDescriptor {
 	public CreateContainerCmd config(CreateContainerCmd cmd) {
 		String dockerBridgeIp = System.getProperty(DOCKER_BRIDGE_IP_PROPERTY, DOCKER_BRIDGE_IP_DEFAULT);
 		return cmd.withBinds(new Bind("/var/run/docker.sock", new Volume("/tmp/docker.sock")))
-				.withCmd("-ip=" + dockerBridgeIp, "-cleanup","consul://" + dockerBridgeIp + ":" + CONSUL_PORT);
+				.withCmd("-ip=" + dockerBridgeIp, "-cleanup", "-internal", "consul://" + dockerBridgeIp + ":" + CONSUL_PORT);
 	}
 	
 }
