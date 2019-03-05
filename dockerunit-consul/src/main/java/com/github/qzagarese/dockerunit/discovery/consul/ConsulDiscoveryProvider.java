@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectContainerResponse;
-import com.github.dockerjava.api.model.Ports.Binding;
+import com.github.dockerjava.api.model.ContainerNetwork;
 import com.github.qzagarese.dockerunit.Service;
 import com.github.qzagarese.dockerunit.ServiceContext;
 import com.github.qzagarese.dockerunit.ServiceInstance;
@@ -115,18 +115,44 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 
 	private int findPort(InspectContainerResponse response, List<ServiceRecord> records) {
 		Optional<ServiceRecord> record = records.stream()
-			.filter(r -> this.matchPort(r, response))
+			.filter(r -> this.matchRecord(r, response))
 			.findFirst();
-		return record.isPresent() ? record.get().getPort() : records.stream().findFirst().map(sr -> sr.getPort()).orElse(0);
+		return record.isPresent() ? extractMappedPort(record.get().getPort(), response) : 0;
 	}
 
-	private boolean matchPort(ServiceRecord record, InspectContainerResponse r) {
-		return r.getNetworkSettings().getPorts().getBindings().values()
-                .stream()
-                .map(bindings -> Optional.ofNullable(bindings).orElse(new Binding[]{}))
-                .filter(b -> b.length > 0)
-                .map(b -> parsePort(b[0].getHostPortSpec()))
-                .anyMatch(port -> record.getPort() == port.orElse(-1));
+	private int extractMappedPort(int port, InspectContainerResponse response) {
+		return response.getNetworkSettings().getPorts().getBindings().entrySet().stream()
+				.filter(entry -> entry.getKey().getPort() == port)
+				.map(entry -> entry.getValue())
+				.filter(bindings -> bindings != null && bindings.length > 0)
+				.findFirst()
+				.map(bindings -> parsePort(bindings[0].getHostPortSpec()).orElse(0))
+				.get();
+	}
+
+	private boolean matchRecord(ServiceRecord record, InspectContainerResponse r) {
+		return matchIP(record.getServiceAddress(), r) && matchPort(record.getPort(), r);
+	}
+
+	private boolean matchPort(int port, InspectContainerResponse r) {
+		return r.getNetworkSettings().getPorts().getBindings().entrySet().stream()
+				.map(entry -> entry.getKey().getPort())
+				.filter(p -> p == port)
+				.findFirst()
+				.isPresent();
+	}
+
+	private boolean matchIP(String address, InspectContainerResponse r) {
+		return null != address && address.equals(extractIp(r));
+	}
+
+	private String extractIp(InspectContainerResponse r) {
+		Optional<ContainerNetwork> bridge = r.getNetworkSettings().getNetworks().entrySet()
+				.stream()
+				.filter(entry -> entry.getKey().equals("bridge"))
+				.map(entry -> entry.getValue())
+				.findFirst();
+		return bridge.isPresent() ? bridge.get().getIpAddress() : null;
 	}
 
 	private Optional<Integer> parsePort(String s) {
