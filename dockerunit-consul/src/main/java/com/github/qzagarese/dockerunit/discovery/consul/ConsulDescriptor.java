@@ -22,7 +22,7 @@ import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryCo
 public class ConsulDescriptor {
 
 
-    static final int CONSUL_DNS_PORT = 8600;
+    static final int CONSUL_DNS_PORT = 53;
     static final int CONSUL_PORT = 8500;
 
     private static final Logger logger = Logger.getLogger(ConsulDescriptor.class.getSimpleName());
@@ -50,22 +50,23 @@ public class ConsulDescriptor {
 
         bindings.bind(consulPort, Binding.bindPort(8500));
 
-        return cmd.withExposedPorts(ports)
-                .withPortBindings(bindings)
-                .withCmd("agent", "-dev", "-client=0.0.0.0", "-enable-script-checks");
-
-    }
-
-    private void activateDns(List<ExposedPort> ports, Ports bindings) {
         ExposedPort dnsPort = ExposedPort.udp(CONSUL_DNS_PORT);
         ports.add(dnsPort);
 
-        int dnsBridgePort = Integer.parseInt(System.getProperty(CONSUL_DNS_PORT_BRIDGE_BINDING,
-                CONSUL_DNS_PORT_BRIDGE_BINDING_DEFAULT));
+        return cmd.withExposedPorts(ports)
+                .withPortBindings(bindings)
+//                .withCmd("agent", "-dev", "-client=0.0.0.0", "-enable-script-checks", "-dns-port=53");
+                .withCmd("sh", "-c", "consul agent -dev -client=0.0.0.0 -enable-script-checks -dns-port=53");
+    }
 
-        bindings.bind(dnsPort, Binding.bindIpAndPort(
-                System.getProperty(DOCKER_BRIDGE_IP_PROPERTY, DOCKER_BRIDGE_IP_DEFAULT),
-                dnsBridgePort));
+    private void activateDns(List<ExposedPort> ports, Ports bindings) {
+//        ExposedPort dnsPort = ExposedPort.udp(CONSUL_DNS_PORT);
+//        ports.add(dnsPort);
+
+//        int dnsBridgePort = Integer.parseInt(System.getProperty(CONSUL_DNS_PORT_BRIDGE_BINDING,
+//                CONSUL_DNS_PORT_BRIDGE_BINDING_DEFAULT));
+//
+//        bindings.bind(dnsPort, Binding.bindPort(dnsBridgePort));
     }
 
 }

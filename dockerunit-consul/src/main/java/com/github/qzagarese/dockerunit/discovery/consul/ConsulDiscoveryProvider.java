@@ -1,22 +1,7 @@
 package com.github.qzagarese.dockerunit.discovery.consul;
 
-import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDescriptor.CONSUL_PORT;
-import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.CONSUL_POLLING_PERIOD;
-import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.CONSUL_POLLING_PERIOD_DEFAULT;
-import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.DOCKER_BRIDGE_IP_DEFAULT;
-import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.DOCKER_BRIDGE_IP_PROPERTY;
-import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.DOCKER_HOST_PROPERTY;
-import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.SERVICE_DISCOVERY_TIMEOUT;
-import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.SERVICE_DISCOVERY_TIMEOUT_DEFAULT;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectContainerResponse;
-import com.github.dockerjava.api.model.ContainerNetwork;
 import com.github.qzagarese.dockerunit.Service;
 import com.github.qzagarese.dockerunit.ServiceContext;
 import com.github.qzagarese.dockerunit.ServiceInstance;
@@ -26,6 +11,14 @@ import com.github.qzagarese.dockerunit.discovery.consul.annotation.EnableConsul;
 import com.github.qzagarese.dockerunit.internal.ServiceDescriptor;
 import com.github.qzagarese.dockerunit.internal.docker.DefaultDockerClientProvider;
 import com.github.qzagarese.dockerunit.internal.service.DefaultServiceContext;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDescriptor.CONSUL_PORT;
+import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryConfig.*;
 
 public class ConsulDiscoveryProvider implements DiscoveryProvider {
 
@@ -82,7 +75,7 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 		Set<ServiceInstance> withPorts = s.getInstances().stream()
 				.map(si -> {
 					InspectContainerResponse r = dockerClient.inspectContainerCmd(si.getContainerId()).exec();
-					return si.withPort(findPort(r, records))
+					return si.withPort(findPort(r, records).orElse(0))
 							.withIp(DOCKER_HOST)
 							.withStatus(Status.DISCOVERED)
 							.withStatusDetails("Discovered via consul + registrator");					
@@ -113,21 +106,13 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 		}
 	}
 
-	private int findPort(InspectContainerResponse response, List<ServiceRecord> records) {
-		Optional<ServiceRecord> record = records.stream()
-			.filter(r -> this.matchRecord(r, response))
-			.findFirst();
-		return record.isPresent() ? extractMappedPort(record.get().getPort(), response) : 0;
-	}
+	private Optional<Integer> findPort(InspectContainerResponse response, List<ServiceRecord> records) {
+		return records.stream()
+			.filter(r -> matchRecord(r, response))
+			.findFirst()
+			.map(r -> ContainerUtils.extractMappedPort(r.getPort(), response.getNetworkSettings()))
+			.get();
 
-	private int extractMappedPort(int port, InspectContainerResponse response) {
-		return response.getNetworkSettings().getPorts().getBindings().entrySet().stream()
-				.filter(entry -> entry.getKey().getPort() == port)
-				.map(entry -> entry.getValue())
-				.filter(bindings -> bindings != null && bindings.length > 0)
-				.findFirst()
-				.map(bindings -> parsePort(bindings[0].getHostPortSpec()).orElse(0))
-				.get();
 	}
 
 	private boolean matchRecord(ServiceRecord record, InspectContainerResponse r) {
@@ -143,24 +128,7 @@ public class ConsulDiscoveryProvider implements DiscoveryProvider {
 	}
 
 	private boolean matchIP(String address, InspectContainerResponse r) {
-		return null != address && address.equals(extractIp(r));
+		return null != address && address.equals(Optional.ofNullable(ContainerUtils.extractBridgeIpAddress(r.getNetworkSettings()).orElse(null)));
 	}
-
-	private String extractIp(InspectContainerResponse r) {
-		Optional<ContainerNetwork> bridge = r.getNetworkSettings().getNetworks().entrySet()
-				.stream()
-				.filter(entry -> entry.getKey().equals("bridge"))
-				.map(entry -> entry.getValue())
-				.findFirst();
-		return bridge.isPresent() ? bridge.get().getIpAddress() : null;
-	}
-
-	private Optional<Integer> parsePort(String s) {
-        try {
-            return Optional.of(Integer.parseInt(s));
-        } catch (NumberFormatException nfe) {
-            return Optional.empty();
-        }
-    }
 	
 }
