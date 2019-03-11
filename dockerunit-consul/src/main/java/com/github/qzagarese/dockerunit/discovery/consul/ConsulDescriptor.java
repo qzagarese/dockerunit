@@ -69,8 +69,4 @@ public class ConsulDescriptor {
                 System.getProperty(DOCKER_BRIDGE_IP_PROPERTY, DOCKER_BRIDGE_IP_DEFAULT),
                 dnsBridgePort));
     }
-
-        
-	}
-	
 }
