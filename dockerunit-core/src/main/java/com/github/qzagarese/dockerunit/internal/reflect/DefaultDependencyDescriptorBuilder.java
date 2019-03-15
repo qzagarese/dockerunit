@@ -27,7 +27,7 @@ public class DefaultDependencyDescriptorBuilder implements UsageDescriptorBuilde
 
     @Override
     public UsageDescriptor buildDescriptor(FrameworkMethod method) {
-       return buildDescriptor((AnnotatedElement) method.getMethod());
+       return buildDescriptor(method.getMethod());
     }
 
     
@@ -138,7 +138,7 @@ public class DefaultDependencyDescriptorBuilder implements UsageDescriptorBuilde
                 && m.getParameterTypes()[0].equals(CreateContainerCmd.class)
                 && m.getReturnType().equals(CreateContainerCmd.class))
             .findFirst();
-        return opt.orElseGet(() -> null);
+        return opt.orElse(null);
     }
 
     private int extractReplicas(Use use) {

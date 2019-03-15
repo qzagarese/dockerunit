@@ -6,6 +6,7 @@ import static com.github.qzagarese.dockerunit.discovery.consul.ConsulDiscoveryCo
 
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.model.Bind;
+import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Volume;
 import com.github.qzagarese.dockerunit.annotation.ContainerBuilder;
 import com.github.qzagarese.dockerunit.annotation.Image;
@@ -17,9 +18,12 @@ public class RegistratorDescriptor {
 
 	@ContainerBuilder
 	public CreateContainerCmd config(CreateContainerCmd cmd) {
+		HostConfig hc = cmd.getHostConfig().withBinds(new Bind("/var/run/docker.sock", new Volume("/tmp/docker.sock")));
+
 		String dockerBridgeIp = System.getProperty(DOCKER_BRIDGE_IP_PROPERTY, DOCKER_BRIDGE_IP_DEFAULT);
-		return cmd.withBinds(new Bind("/var/run/docker.sock", new Volume("/tmp/docker.sock")))
-				.withCmd("-ip=" + dockerBridgeIp, "-cleanup","consul://" + dockerBridgeIp + ":" + CONSUL_PORT);
+
+		return cmd.withHostConfig(hc)
+				.withCmd("-ip=" + dockerBridgeIp, "-cleanup", "consul://" + dockerBridgeIp + ":" + CONSUL_PORT);
 	}
 	
 }

@@ -2,6 +2,7 @@ package com.github.qzagarese.dockerunit.discovery.consul;
 
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.Ports.Binding;
 import com.github.qzagarese.dockerunit.annotation.ContainerBuilder;
@@ -34,8 +35,8 @@ public class ConsulDescriptor {
 
         ExposedPort consulPort = ExposedPort.tcp(CONSUL_PORT);
         ports.add(consulPort);
-
-        Ports bindings = cmd.getPortBindings();
+        
+        Ports bindings = cmd.getHostConfig().getPortBindings();
         if (bindings == null) {
             bindings = new Ports();
         }
@@ -50,10 +51,11 @@ public class ConsulDescriptor {
 
         bindings.bind(consulPort, Binding.bindPort(8500));
 
-        return cmd.withExposedPorts(ports)
-                .withPortBindings(bindings)
-                .withCmd("agent", "-dev", "-client=0.0.0.0", "-enable-script-checks");
+        HostConfig hc = cmd.getHostConfig().withPortBindings(bindings);
 
+        return cmd.withHostConfig(hc)
+                .withExposedPorts(ports)
+                .withCmd("agent", "-dev", "-client=0.0.0.0", "-enable-script-checks");
     }
 
     private void activateDns(List<ExposedPort> ports, Ports bindings) {
@@ -67,5 +69,4 @@ public class ConsulDescriptor {
                 System.getProperty(DOCKER_BRIDGE_IP_PROPERTY, DOCKER_BRIDGE_IP_DEFAULT),
                 dnsBridgePort));
     }
-
 }
