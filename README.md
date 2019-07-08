@@ -125,11 +125,13 @@ import com.github.qzagarese.dockerunit.ServiceInstance;
 import com.github.qzagarese.dockerunit.annotation.Use;
 import com.jayway.restassured.RestAssured;
 
-@RunWith(DockerUnitRunner.class) // Enables Dockerunit
+// Enables Dockerunit
+@RunWith(DockerUnitRunner.class) 
 public class MyServiceTest {
 
 	@Test
-	@Use(service=MyServiceDescriptor.class) // Selects the previously defined descriptor
+  // Selects the previously defined descriptor
+	@Use(service=MyServiceDescriptor.class) 
 	public void healthCheckShouldReturn200(ServiceContext context) {
 		// Gets the service based on value in the @Named annotation
 		Service s = context.getService("my-spring-service"); 
@@ -142,7 +144,8 @@ public class MyServiceTest {
 				The port could be dynamic if @PublishPorts is used */
 				.baseUri("http://" + si.getIp() + ":" + si.getPort()) 
 			.when()
-				.get("/health-check") // Hits the health-check endpoint 
+        // Hits the health-check endpoint
+				.get("/health-check")  
 			.then()
 				.assertThat()
 				.statusCode(200);
@@ -162,7 +165,8 @@ import com.github.qzagarese.dockerunit.ServiceInstance;
 import com.github.qzagarese.dockerunit.annotation.Use;
 import com.jayway.restassured.RestAssured;
 
-@Use(service=MyServiceDescriptor.class) // Selects the previously defined descriptor
+// Selects the previously defined descriptor
+@Use(service=MyServiceDescriptor.class) 
 public class MyServiceTest {
 
 	@Rule
@@ -188,7 +192,8 @@ public class MyServiceTest {
 				The port could be dynamic if @PublishPorts is used */
 				.baseUri("http://" + si.getIp() + ":" + si.getPort()) 
 			.when()
-				.get("/health-check") // Hits the health-check endpoint 
+        // Hits the health-check endpoint
+				.get("/health-check") 
 			.then()
 				.assertThat()
 				.statusCode(200);
