@@ -130,7 +130,7 @@ import com.jayway.restassured.RestAssured;
 public class MyServiceTest {
 
 	@Test
-  // Selects the previously defined descriptor
+        // Selects the previously defined descriptor
 	@Use(service=MyServiceDescriptor.class) 
 	public void healthCheckShouldReturn200(ServiceContext context) {
 		// Gets the service based on value in the @Named annotation
@@ -144,7 +144,7 @@ public class MyServiceTest {
 				The port could be dynamic if @PublishPorts is used */
 				.baseUri("http://" + si.getIp() + ":" + si.getPort()) 
 			.when()
-        // Hits the health-check endpoint
+                                // Hits the health-check endpoint
 				.get("/health-check")  
 			.then()
 				.assertThat()
@@ -192,7 +192,7 @@ public class MyServiceTest {
 				The port could be dynamic if @PublishPorts is used */
 				.baseUri("http://" + si.getIp() + ":" + si.getPort()) 
 			.when()
-        // Hits the health-check endpoint
+                                // Hits the health-check endpoint
 				.get("/health-check") 
 			.then()
 				.assertThat()
