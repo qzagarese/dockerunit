@@ -1,3 +1,9 @@
+We have moved development to [github.com/dockerunit](https://github.com/dockerunit)
+
+Documentation is available at [dockerunit.github.io](https://dockerunit.github.io)
+
+Please star us on [github.com/dockerunit/dockerunit-core](https://github.com/dockerunit/dpckerunit-core) :-)
+
 # Dockerunit - JUnit for Docker containers
 
 Dockerunit is an extensible framework for testing of dockerised services and 
